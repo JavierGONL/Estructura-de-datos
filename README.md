@@ -9,4 +9,4 @@
 ## Instrucciones compilacion quiz 3
 ### Version utilizada: Java 26
 ### Instrucciones: 
-Para ejecutar adecuadamente la solucion propuesta para el snake es necesario compilar el archivo usando el comando javac, posteriormente iniciandolo con java snake
+Para ejecutar adecuadamente la solucion propuesta para el snake y la implementacion del arreglo dinamico es necesario compilar los archivos en formato .java usando el comando javac, posteriormente iniciandolo con el comando java en una terminal
