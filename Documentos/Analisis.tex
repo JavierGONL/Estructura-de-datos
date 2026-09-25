@@ -1,0 +1,240 @@
+% Plantilla de analysis.pdf (Quiz 03). 
+% Los comentarios % bajo cada apartado son pistas: no salen en el PDF.
+% Limite de la entrega: 4 paginas.
+% Compilar: pdflatex analysis_plantilla.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[a4paper,top=1.4cm,bottom=1.5cm,left=1.7cm,right=1.7cm]{geometry}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\setlength{\emergencystretch}{2em}
+\setlist{nosep,leftmargin=1.3em}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{9pt}{2pt}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\phys}{\operatorname{phys}}
+% Apartado: \sub{a}{Titulo corto}
+\newcommand{\sub}[2]{\medskip\par\noindent\textbf{#1) #2.}\ }
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Estructuras de Datos --- Quiz 03}\\[1pt]
+{\large Dynamic Arrays and Amortized Analysis} \quad$\cdot$\quad analysis.pdf \quad$\cdot$\quad Semestre 2026-2
+\end{center}
+\vspace{-6pt}
+\textbf{Nombre:} Kevin Javier Gonzalez \hfill \textbf{Documento:} 1093432420 \hfill \textbf{Grupo:} 3
+
+\section*{Notación y modelo de costo}
+% k, C, n (incluye transitorio k+1), m, g<=m.
+% Modelo: escribir=1, copiar en resize=1, aritmetica O(1).
+
+
+%=====================================================================
+\section*{P1 --- Arreglo dinámico desde cero}
+
+\sub{a}{Implementación}
+% Referencia a src/DynamicArray.java. Representacion: data, size, capacity.
+En el archivo de DynamicArray.Java esta el Codigo.
+
+\sub{b}{Invariantes}
+% Minimo 3, validos antes y despues de cada operacion publica.
+% Sugeridos: 0<=size<=capacity; capacity=data.length>=1; data[0..size-1] validos;
+% data[size..] = null; capacity solo se duplica cuando size=capacity.
+\begin{enumerate}[label=\textbf{I\arabic*.}]
+\item 0 <= size <= capacity
+\item capacity >= 1
+\item valores no nulos en data estan desde [0, size - 1], data[size] == null
+\end{enumerate}
+% Justificar la preservacion en append / removeLast / resize.
+
+
+\sub{c}{Complejidad worst-case}\par\smallskip
+\renewcommand{\arraystretch}{2}
+\begin{tabular}{@{}L{0.16\textwidth}L{0.2\textwidth}L{0.55\textwidth}@{}}
+\toprule
+Operación & Worst-case & Justificación\\
+\midrule
+\texttt{get}       & $\Theta(1)$  & es simplemente una busqueda, el array por defecto ya lo hace en O(1) \\ 
+\texttt{set}        & $\Theta(1)$ & igualmente al set, es una busqueda de costo 1 + una asignacion de costo 1 en todo los casos\\
+\texttt{append}     & O(n) & en el peor caso tengo que construir un nuevo array y dato por dato del anterior asignarlo en la misma pos del nuevo array, claro n es size dado que mas alla de size no toca asignar nada\\
+\texttt{removeLast} & $\Theta(1)$ & aca igualmente es siempre el mismo valor, hago una busqueda de costo 1, y hago una asignacion de costo 1, y luego simplemente hago size-- que tambien es de costo 1 \\
+\bottomrule
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+
+
+\sub{d}{Worst-case vs.\ amortizado}
+% Por que el append caro no contradice el amortizado constante.
+% Resize solo con size=C, cuesta C, deja 2C. Sumar los resizes de N appends.
+
+cuando hago append si $size$ < a $capacity$ entonces solo tengo que hacer una operacion de asignacion de coste 1, entonces cada que se duplica la capacity tengo $\frac{capacity}{2}$ veces para hacer operaciones de costo 1
+
+%=====================================================================
+\section*{P2 --- Snake sobre \texttt{DynamicArray} con desplazamiento}
+
+\sub{a}{Costo de \texttt{removeTail}}
+% Iteraciones del bucle cuando size = k+1.
+
+cuando se llama a remove tail en esa implementacion, toca eliminar la cola y luego, reasignar los valores que quedan una posicion hacia atras, el costo seria O(n -1) -> O(n), con n siendo el size.
+
+\sub{b}{Costo total de $m$ movimientos}
+% Longitud constante k. Sumar append + desplazamiento (+ resize inicial).
+
+siendo de longitud $k$, hacer $m$ movimientos seria que en cada movimiento tengo el costo $O(k)$ de mover la serpiente, m veces esto, osea el costo final seria $O(k \cdot m)$
+
+\sub{c}{Validez de la afirmación} % por hacer
+% Veredicto + prueba formal. Costo(MOVE) = append + RemoveTail.
+% Comparar sum a_i con sum r_i.
+
+esto es falso, $move()$ no es amortizado porque en cada operacion de $move()$ tengo que hacer n (size) actualizaciones de posicion de la serpiente lo que hace que en promedio sea $\frac{O(n \cdot n)}{n} \rightarrow O(n)$ veces el costo amortizado, a diferencia del append, que en n operaciones el coste es $\frac{O(2n) + O(n)}{n} \rightarrow O(3) \rightarrow O(1)$
+
+
+\sub{d}{Bottleneck} % por hacer
+% Que fija la representacion y por que obliga a mover k elementos.
+
+el bottleneck seria que como en cado movimiento que no coma tengo que hacer $eliminarCola()$ entonces tendria n para ajustar el array dado que la nueva cola debe estar en la posicion 0, pero a su vez como esta en movimiento tengo que hacer n operaciones de calcular su nueva posicion, esto haria que para m operaciones sin comer tendria (n+n)*m operaciones
+
+%=====================================================================
+\section*{P3 --- Rediseño: representación interna}
+
+\sub{a}{Variables de estado}
+\begin{itemize}
+\item \texttt{data}:
+\item \texttt{start}:
+\item \texttt{size}:
+\item \texttt{capacity}: 
+\end{itemize}
+
+\sub{b}{Mapeo lógico $\to$ físico}
+\[
+\phys(i)=
+\]
+% Demostrar: (1) 0<=phys(i)<C. (2) inyectiva. (3) la celda phys(size) esta libre si size<C.
+
+
+\sub{c}{Operaciones}
+% Codigo en src/Snake.java. Costo de cada una.
+\begin{itemize}
+\item \texttt{addHead}:
+\item \texttt{removeTail}:
+\item \texttt{get}:
+\end{itemize}
+
+\sub{d}{\texttt{resize}}
+% Como conserva el orden logico aunque la cola este a la derecha de la cabeza.
+
+
+\sub{e}{Invariantes y corrección}
+\begin{enumerate}[label=\textbf{S\arabic*.}]
+\item
+\item
+\item
+\item
+\end{enumerate}
+% Preservacion en addHead / removeTail / resize.
+
+
+\sub{f}{Traza}
+% Estado tras cada movimiento (size despues de removeTail). Celdas vacias con ``$-$''.
+\par\smallskip
+\renewcommand{\arraystretch}{1.9}
+\begin{tabular}{@{}L{2.3cm}L{4.6cm}c c c L{1.9cm}L{3cm}@{}}
+\toprule
+Mov. & Arreglo físico & \texttt{start} & \texttt{size} & \texttt{capacity} & ¿resize? & Orden lógico\\
+\midrule
+inicial      & & & & & & \\
+N1 (no come) & & & & & & \\
+N2 (come)    & & & & & & \\
+N3 (no come) & & & & & & \\
+N4 (no come) & & & & & & \\
+N5 (come)    & & & & & & \\
+N6 (no come) & & & & & & \\
+\bottomrule
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+
+% Observaciones por movimiento (resize en N1, envoltura en N3--N4, resize con envoltura en N6).
+
+
+%=====================================================================
+\section*{P4 --- Análisis amortizado}
+
+\sub{a}{Aggregate Method}
+% Longitud maxima transitoria n <= g+3. Capacidades en cada resize. Sumar copias en funcion de g.
+
+
+\sub{b}{Suma geométrica}
+% Por que cada termino es la capacidad vigente exactamente cuando ocurre el resize.
+% No basta escribir 1+2+4+...=O(n).
+
+
+\sub{c}{Costo total y amortizado de \texttt{addHead}}
+% T(m) y T(m)/m.
+
+
+\sub{d}{Papel de $m$ y $g$}
+% Que parte del costo depende de m y cual de g.
+
+
+\sub{e}{Método del potencial}
+\[
+\Phi(\texttt{size},C)=
+\]
+\begin{itemize}
+\item \texttt{addHead} sin resize:
+\item \texttt{resize}:
+\item \texttt{removeTail}:
+\end{itemize}
+% Suma de costos amortizados vs. reales (Phi_0, Phi_fin).
+% Suficiencia del potencial pese a que removeTail elimina elementos.
+
+
+%=====================================================================
+\section*{P5 --- The Adversarial Snake}
+
+\sub{a}{El adversario no cambia el número de copias}
+% Prueba: la secuencia de capacidades depende solo de la politica.
+% Que capacidad adicional necesitaria el adversario?
+
+
+\sub{b--e}{Comparación de políticas}
+% Definir: n, inserciones, como se mide el espacio sin usar y el costo amortizado.
+\par\smallskip
+\renewcommand{\arraystretch}{2.4}
+{\setlength{\tabcolsep}{3pt}\begin{tabular}{@{}L{1.45cm}L{3.2cm}L{4.3cm}L{3.2cm}L{3.7cm}@{}}
+\toprule
+Política & \# Resizes & Total copias & Costo amortizado por crecimiento & Espacio sin usar tras resize\\
+\midrule
+$C+1$              & & & & \\
+$2C$               & & & & \\
+$\lceil1.5C\rceil$ & & & & \\
+\bottomrule
+\end{tabular}}
+\renewcommand{\arraystretch}{1}
+% Justificacion de cada fila.
+
+
+\sub{f}{Trade-off}
+% Tiempo, frecuencia de resize, copias, memoria reservada.
+
+
+\medskip\par\noindent\textbf{Familia $C_{\text{new}}=\lceil\alpha C\rceil$.}
+\begin{itemize}
+\item Valores de $\alpha$:
+\item Progreso ($C_{\text{new}}>C$):
+\item Cota superior de copias:
+\item Cota inferior de copias:
+\item Costo amortizado:
+\item Necesidad de $\alpha>1$ constante:
+\end{itemize}
+
+\end{document}

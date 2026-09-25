@@ -1,0 +1,18 @@
+{
+    "Java": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-maven"
+    ],
+    "Python": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "ms-toolsai.jupyter"
+    ],
+    "LaTeX": [
+        "james-yu.latex-workshop"
+    ],
+    "MATLAB": [
+        "MathWorks.language-matlab"
+    ]
+}
