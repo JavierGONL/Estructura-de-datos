@@ -31,7 +31,7 @@ public class snake<T> { // hacer un array circular, elimino el invariante de dat
         } else {
             throw new IndexOutOfBoundsException("indice fuera del array");
         }
-    }
+    }  
 
     public void set(int index, T value) { // complejidad O(1)
         if (index < size && index >= 0) {
