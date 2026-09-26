@@ -3,7 +3,7 @@
 ## Integrantes:
 - Kevin Javier Gonzalez Luna
 - Iván Felipe Maluche Suarez
-- Angelica Pascagaza Vega
+- Angélica Pascagaza Vega
 
 
 ## Instrucciones compilacion quiz 3

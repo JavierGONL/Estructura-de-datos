@@ -5,7 +5,6 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
 \usepackage[spanish,es-noshorthands]{babel}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs,array}
@@ -21,7 +20,6 @@
 \titlespacing*{\section}{0pt}{9pt}{2pt}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \newcommand{\phys}{\operatorname{phys}}
-% Apartado: \sub{a}{Titulo corto}
 \newcommand{\sub}[2]{\medskip\par\noindent\textbf{#1) #2.}\ }
 
 \begin{document}
@@ -31,28 +29,23 @@
 {\large Dynamic Arrays and Amortized Analysis} \quad$\cdot$\quad analysis.pdf \quad$\cdot$\quad Semestre 2026-2
 \end{center}
 \vspace{-6pt}
-\textbf{Nombre:} Kevin Javier Gonzalez \hfill \textbf{Documento:} 1093432420 \hfill \textbf{Grupo:} 3
+\textbf{Nombres:} Kevin Javier Gonzalez, Iván Felipe Maluche Suarez, Angelica Pascagaza Vega \hfill \textbf{Documento:} 1093432420 \hfill \textbf{Grupo:} 3
 
 \section*{Notación y modelo de costo}
-% k, C, n (incluye transitorio k+1), m, g<=m.
-% Modelo: escribir=1, copiar en resize=1, aritmetica O(1).
-
 
 %=====================================================================
 \section*{P1 --- Arreglo dinámico desde cero}
 
 \sub{a}{Implementación}
 % Referencia a src/DynamicArray.java. Representacion: data, size, capacity.
-En el archivo de DynamicArray.Java esta el Codigo.
+En el archivo de DynamicArray.Java se encuentra la implementacion del arreglo dinamico.
 
 \sub{b}{Invariantes}
-% Minimo 3, validos antes y despues de cada operacion publica.
-% Sugeridos: 0<=size<=capacity; capacity=data.length>=1; data[0..size-1] validos;
-% data[size..] = null; capacity solo se duplica cuando size=capacity.
+
 \begin{enumerate}[label=\textbf{I\arabic*.}]
-\item 0 <= size <= capacity
-\item capacity >= 1
-\item valores no nulos en data estan desde [0, size - 1], data[size] == null
+\item $$0 \leq size \leq capacity$$
+\item $$ capacity \geq 1$$
+\item $$ index \in [0, size), data[size] == null $$
 \end{enumerate}
 % Justificar la preservacion en append / removeLast / resize.
 
@@ -63,36 +56,39 @@ En el archivo de DynamicArray.Java esta el Codigo.
 \toprule
 Operación & Worst-case & Justificación\\
 \midrule
-\texttt{get}       & $\Theta(1)$  & es simplemente una busqueda, el array por defecto ya lo hace en O(1) \\ 
-\texttt{set}        & $\Theta(1)$ & igualmente al set, es una busqueda de costo 1 + una asignacion de costo 1 en todo los casos\\
-\texttt{append}     & O(n) & en el peor caso tengo que construir un nuevo array y dato por dato del anterior asignarlo en la misma pos del nuevo array, claro n es size dado que mas alla de size no toca asignar nada\\
-\texttt{removeLast} & $\Theta(1)$ & aca igualmente es siempre el mismo valor, hago una busqueda de costo 1, y hago una asignacion de costo 1, y luego simplemente hago size-- que tambien es de costo 1 \\
+\texttt{get}       & $\Theta(1)$  & El metodo solamente comprueba si el index es valido y devuelve el dato, debido a que el array por defecto ya lo hace sin necesidad de recorrer nada cuesta O(1) \\ 
+\texttt{set}        & $\Theta(1)$ & Similar a get, es una busqueda de costo 1 mas en este caso se asigna al valor un dato manteniendo constante la cota\\
+\texttt{append}     & O(n) & Debido al resize en el peor caso es necesario construir un nuevo array y dato por dato del anterior asignarlo en el mismo.\\
+\texttt{removeLast} & $\Theta(1)$ & Tal como el caso de get y set consiste en guardar el ultimo valor, asginarle un nulo y disminuir size, siendo operaciones que me dan una cota constante.\\
 \bottomrule
 \end{tabular}
 \renewcommand{\arraystretch}{1}
 
 
 \sub{d}{Worst-case vs.\ amortizado}
-% Por que el append caro no contradice el amortizado constante.
-% Resize solo con size=C, cuesta C, deja 2C. Sumar los resizes de N appends.
 
-cuando hago append si $size$ < a $capacity$ entonces solo tengo que hacer una operacion de asignacion de coste 1, entonces cada que se duplica la capacity tengo $\frac{capacity}{2}$ veces para hacer operaciones de costo 1
+Al realizar el append siempre que $size$ < a $capacity$ el coste de operacion sera "barata", lo cual permite que cuando pase el caso en que ($size = capacity$) el costo de resize se amoritugara en el total.
 
 %=====================================================================
 \section*{P2 --- Snake sobre \texttt{DynamicArray} con desplazamiento}
 
 \sub{a}{Costo de \texttt{removeTail}}
-cuando se llama a remove tail en esa implementacion, toca eliminar la cola y luego, reasignar los valores que quedan una posicion hacia atras, el costo seria O(n -1) -> O(n), con n siendo el size.
+
+Al llamar removeTail en esa implementacion es necesario eliminar la cola y luego reasignar los valores que quedan una posicion hacia atras, esto implica un costo O(n) (con n siendo en este caso el size) al tener que recorrer el array .
 
 \sub{b}{Costo total de $m$ movimientos}
-siendo de longitud $k$, hacer $m$ movimientos seria que en cada movimiento tengo el costo $O(k)$ de mover la serpiente, m veces esto, osea el costo final seria $O(k \cdot m)$
+
+Al ser de longitud k habria un costo de $O(k)$ lo cual al realizarse m veces nos daria un costo total de $O(km)$.
 
 \sub{c}{Validez de la afirmación} % por hacer
-esto es falso, $move()$ no es amortizado porque en cada operacion de $move()$ tengo que hacer n (size) actualizaciones de posicion de la serpiente lo que hace que en promedio sea $\frac{O(n \cdot n)}{n} \rightarrow O(n)$ veces el costo amortizado, a diferencia del append, que en n operaciones el coste es $\frac{O(2n) + O(n)}{n} \rightarrow O(3) \rightarrow O(1)$
+Esto es falso, $move()$ no es amortizado porque en cada operacion de $move()$ tengo que hacer n (size) actualizaciones de posicion de la serpiente lo que hace que en promedio sea $\frac{O(n \cdot n)}{n} \rightarrow O(n)$ veces el costo amortizado, a diferencia del caso de append donde gracias a la distribucion entre operaciones caras y baratas el coste se amortigua.
 
 
 \sub{d}{Bottleneck} % por hacer
-el bottleneck seria que como en cado movimiento que no coma tengo que hacer $eliminarCola()$ entonces tendria n para ajustar el array dado que la nueva cola debe estar en la posicion 0, pero a su vez como esta en movimiento tengo que hacer n operaciones de calcular su nueva posicion, esto haria que para m operaciones sin comer tendria $(n+n) \cdot m$ operaciones
+% Que fija la representacion y por que obliga a mover k elementos.
+
+El bottleneck en esta implementacion consistiria en que debido a que en cada movimiento que la serpiente no consuma una manzana (lo cual pasara frecuentemente) sera necesario ejecutar un RemoveTail, el cual como se explico en el punto anterior es O(n).
+Esto culminara en que esta operacion basica y siempre necesaria para todo el loop jugable tenga un costo considerable y pueda generar problemas de estabilidad al ejecutarse en casi todo momento.
 
 %=====================================================================
 \section*{P3 --- Rediseño: representación interna}
