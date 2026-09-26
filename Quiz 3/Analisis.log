@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.8.25)  25 SEP 2026 19:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.9.19)  25 SEP 2026 19:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**"/home/ivanm/Documentos/universidad/estructuras/grupo_Ds/Estructura-de-datos/Quiz 3/Analisis.tex"
-(/home/ivanm/Documentos/universidad/estructuras/grupo_Ds/Estructura-de-datos/Quiz 3/Analisis.tex
+**"/home/redento/Escritorio/6to semestre/Estructura de datos/Quiz 3/Analisis.tex"
+(/home/redento/Escritorio/6to semestre/Estructura de datos/Quiz 3/Analisis.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (/usr/share/texmf-dist/tex/latex/base/article.cls
@@ -273,7 +273,7 @@ LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/cmtt/m/n' tried instead on input line 75.
  [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
 Overfull \hbox (3.16623pt too wide) in paragraph at lines 137--151
 [][]
  []
@@ -293,18 +293,18 @@ L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 4702 strings out of 469453
- 70657 string characters out of 5469037
+ 4703 strings out of 469453
+ 70618 string characters out of 5469037
  499432 words of memory out of 5000000
  33337 multiletter control sequences out of 15000+600000
  641344 words of font info for 72 fonts, out of 8000000 for 9000
  40 hyphenation exceptions out of 8191
- 57i,9n,65p,468b,365s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0800.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx0800.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </home/ivanm/.texlive/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on Analisis.pdf (3 pages, 132214 bytes).
+ 57i,9n,65p,450b,365s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx0800.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1095.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt1095.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
+Output written on Analisis.pdf (3 pages, 256575 bytes).
 PDF statistics:
- 305 PDF objects out of 1000 (max. 8388607)
- 62 compressed objects within 1 object stream
+ 90 PDF objects out of 1000 (max. 8388607)
+ 54 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
