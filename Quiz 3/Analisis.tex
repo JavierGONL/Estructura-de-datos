@@ -188,40 +188,46 @@ N6 (no come) & & & & & & \\
 %=====================================================================
 \section*{P5 --- The Adversarial Snake}
 
-\sub{a}{El adversario no cambia el número de copias}
-% Prueba: la secuencia de capacidades depende solo de la politica.
-% Que capacidad adicional necesitaria el adversario?
+\subsection*{a) El adversario no cambia el número de copias}
 
+Al no tener un adversario, un \texttt{resize} solo se ejecuta cuando $\texttt{size} = \texttt{capacity}$, y en ese instante se copian exactamente $C_j$ elementos. El adversario controla cuándo ocurre cada \texttt{resize}, pero no cuántos ni de qué tamaño (la secuencia de capacidades $C_0, C_1, C_2, \dots$ depende solo de la política y de $n$). Por tanto, el total de copias $\sum C_j$ es el mismo sin importar el momento del crecimiento.
 
-\sub{b--e}{Comparación de políticas}
-% Definir: n, inserciones, como se mide el espacio sin usar y el costo amortizado.
-\par\smallskip
-\renewcommand{\arraystretch}{2.4}
-{\setlength{\tabcolsep}{3pt}\begin{tabular}{@{}L{1.45cm}L{3.2cm}L{4.3cm}L{3.2cm}L{3.7cm}@{}}
+Para aumentar las copias, el adversario necesitaría poder ejercutar un \texttt{resize} con $\texttt{size} < \texttt{capacity}$, es decir, controlar también la política de capacidad o contraer la estructura para volver a expandirla. Sin contracción y con política fija, el número de copias queda determinado por $n$ y $\alpha$.
+
+\subsection*{b--e) Comparación de políticas}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item \textbf{$C+1$:} se copian $2+j$ en el resize $j$, luego $\sum_{j=0}^{n-3}(2+j) = \Theta(n^2)$.
+    \item \textbf{$2C$:} serie geométrica de razón $2$, $\sum_{j=0}^{r-1} 2^{j+1} = 2^{r+1}-2 < 2n = O(n)$, y como la última copia es $\Theta(n)$, también $\Omega(n)$. Total $\Theta(n)$.
+    \item \textbf{$\lceil 1.5C\rceil$:} serie geométrica de razón $1.5$; el último término domina, $\sum_{j=0}^{r-1} C_j = (C_r - C_0)/(1.5-1) = \Theta(n)$.
+\end{itemize}
+
+En los tres casos el costo amortizado por crecimiento es el total de copias dividido entre las $n$ inserciones que provocaron crecimiento. El espacio sin usar tras el resize es $C_{\text{new}} - (C_{\text{old}}+1)$, y su fracción se mide respecto a $C_{\text{new}}$.
+
+\renewcommand{\arraystretch}{1.4}
+{\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}L{1.7cm}L{2.1cm}L{2cm}L{2.4cm}L{2.8cm}@{}}
 \toprule
-Política & \# Resizes & Total copias & Costo amortizado por crecimiento & Espacio sin usar tras resize\\
+Política & \# Resizes & Total copias & Costo amortizado & Espacio sin usar tras resize \\
 \midrule
-$C+1$              & & & & \\
-$2C$               & & & & \\
-$\lceil1.5C\rceil$ & & & & \\
+$C+1$              & $\Theta(n)$      & $\Theta(n^2)$ & $\Theta(n)$ & $0$ \ ($0\%$) \\
+$2C$               & $\Theta(\log n)$ & $\Theta(n)$   & $\Theta(1)$ & $\approx C/2$ \ ($\approx 50\%$) \\
+$\lceil 1.5C\rceil$ & $\Theta(\log n)$ & $\Theta(n)$   & $\Theta(1)$ & $\approx C/3$ \ ($\approx 33\%$) \\
 \bottomrule
 \end{tabular}}
 \renewcommand{\arraystretch}{1}
-% Justificacion de cada fila.
 
+\subsection*{f) Trade-off}
 
-\sub{f}{Trade-off}
-% Tiempo, frecuencia de resize, copias, memoria reservada.
+$C+1$ ahorra memoria ($0\%$ libre) pero es lento ($\Theta(n^2)$ copias, $\Theta(n)$ amortizado). $2C$ es rápido ($\Theta(1)$ amortizado) pero desperdicia $\approx 50\%$ de la capacidad. $\lceil 1.5C\rceil$ es el punto intermedio: mismo orden asintótico que $2C$ ($\Theta(\log n)$ resizes, $\Theta(n)$ copias, $\Theta(1)$ amortizado) pero con más resizes en constante, a cambio de desperdiciar solo $\approx 33\%$.
 
+\subsection*{Familia $C_{\text{new}} = \lceil \alpha C \rceil$}
 
-\medskip\par\noindent\textbf{Familia $C_{\text{new}}=\lceil\alpha C\rceil$.}
-\begin{itemize}
-\item Valores de $\alpha$:
-\item Progreso ($C_{\text{new}}>C$):
-\item Cota superior de copias:
-\item Cota inferior de copias:
-\item Costo amortizado:
-\item Necesidad de $\alpha>1$ constante:
-\end{itemize}
+Para que la capacidad crezca se necesita $\alpha > 1$. La suma de capacidades es geométrica de razón $\alpha$; como $\alpha > 1$, el último término domina:
+\[
+\sum_{j=0}^{r-1} C_j = \frac{C_r - C_0}{\alpha - 1} = \Theta\!\left(\frac{n}{\alpha - 1}\right),
+\qquad r = \Theta(\log_\alpha n).
+\]
+Para $\alpha$ constante y $\alpha > 1$, el total de copias es $\Theta(n/(\alpha-1)) = \Theta(n)$ y el costo amortizado es $\Theta(1/(\alpha-1)) = \Theta(1)$. Por tanto, duplicar no es necesario: cualquier $\alpha > 1$ constante funciona. Lo que no funciona es $\alpha = 1 + o(1)$ (crecimiento subgeométrico), porque entonces las copias dejan de ser lineales en $n$.
 
 \end{document}
