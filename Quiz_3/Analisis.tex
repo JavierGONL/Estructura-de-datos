@@ -93,61 +93,97 @@ Esto culminara en que esta operacion basica y siempre necesaria para todo el loo
 %=====================================================================
 \section*{P3 --- Rediseño: representación interna}
 
-\sub{a}{Variables de estado}
-\begin{itemize}
-\item \texttt{data}:
-\item \texttt{start}:
-\item \texttt{size}:
-\item \texttt{capacity}: 
+\subsection*{a) Variables de estado}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{data}: arreglo nativo \texttt{Object[]} de tamaño \texttt{capacity} donde se almacenan las posiciones.
+    \item \texttt{tail}: índice físico donde está la \textbf{cola} (índice lógico $0$).
+    \item \texttt{size}: número de elementos vivos (longitud lógica de la serpiente).
+    \item \texttt{capacity}: tamaño físico del arreglo \texttt{data}.
 \end{itemize}
 
-\sub{b}{Mapeo lógico $\to$ físico}
+La cabeza está en $(\texttt{tail} + \texttt{size} - 1) \bmod \texttt{capacity}$. Solo se necesitan estas cuatro variables (constante).
+
+\subsection*{b) Mapeo lógico}
+
 \[
-\phys(i)=
+\text{phys}(i) = (\texttt{tail} + i) \bmod \texttt{capacity}, \qquad 0 \le i < \texttt{size}.
 \]
-% Demostrar: (1) 0<=phys(i)<C. (2) inyectiva. (3) la celda phys(size) esta libre si size<C.
+
+Propiedades:
+\begin{enumerate}[leftmargin=1.2cm]
+    \item \textbf{Rango:} como $\texttt{tail} \in [0, C)$ y $i \in [0, \texttt{size}) \subset [0, C)$, se cumple $0 \le \text{phys}(i) < C$.
+    \item \textbf{Inyectividad:} si $\text{phys}(i) = \text{phys}(j)$ con $0 \le i, j < \texttt{size} \le C$, entonces $i \equiv j \pmod{C}$, y como $|i - j| < C$, se tiene $i = j$.
+    \item \textbf{Celda libre:} si $\texttt{size} < C$, $\text{phys}(\texttt{size}) = (\texttt{tail} + \texttt{size}) \bmod C$ no coincide con ningún $\text{phys}(i)$ con $i < \texttt{size}$, así que esa celda está libre para el próximo \texttt{addHead}.
+\end{enumerate}
+
+\subsection*{c) Operaciones}
 
 
-\sub{c}{Operaciones}
-% Codigo en src/Snake.java. Costo de cada una.
-\begin{itemize}
-\item \texttt{addHead}:
-\item \texttt{removeTail}:
-\item \texttt{get}:
+Costos: \texttt{addHead} $O(1)$ amortizado ($O(\texttt{size})$ solo cuando ejecuta resize); \texttt{removeTail} $O(1)$ worst-case; \texttt{get} $O(1)$.
+
+\subsection*{d) \texttt{resize()}}
+Al copiar en el orden lógico $i = 0, 1, \dots, \texttt{size}-1$ al inicio del nuevo arreglo, se preserva exactamente el mismo orden lógico, sin importar cómo estaban distribuidos físicamente antes. Tras el resize, $\texttt{tail} = 0$.
+
+\subsection*{e) Invariantes}
+
+\begin{enumerate}[label=\textbf{S\arabic*.}, leftmargin=1.2cm]
+    \item $0 \le \texttt{size} \le \texttt{capacity}$ y $\texttt{capacity} \ge 1$.
+    \item $0 \le \texttt{tail} < \texttt{capacity}$.
+    \item \textbf{Mapeo consistente:} $\texttt{data}[\text{phys}(i)]$ es la posición lógica $i$ para todo $0 \le i < \texttt{size}$; en particular, $\texttt{data}[\texttt{tail}]$ es la cola y $\texttt{data}[\text{phys}(\texttt{size}-1)]$ es la cabeza.
+    \item \textbf{Celdas libres:} las $\texttt{capacity} - \texttt{size}$ celdas no ocupadas por $\text{phys}(0..\texttt{size}-1)$ son \texttt{null}.
+\end{enumerate}
+
+Preservación:
+\begin{itemize}[leftmargin=1.2cm]
+    \item \textbf{\texttt{addHead}:} escribe en $\text{phys}(\texttt{size})$ (celda libre, S4) y aumenta \texttt{size} en 1; S1--S3 se mantienen.
+    \item \textbf{\texttt{removeTail}:} lee $\texttt{data}[\texttt{tail}]$, lo pone a \texttt{null} y avanza \texttt{tail}; S1--S4 se mantienen.
+    \item \textbf{\texttt{resize}:} reubica los elementos en orden lógico con $\texttt{tail} = 0$; S1--S4 se mantienen.
 \end{itemize}
 
-\sub{d}{\texttt{resize}}
-% Como conserva el orden logico aunque la cola este a la derecha de la cabeza.
+\subsection*{f) Traza}
 
+Estado inicial: $\texttt{size} = \texttt{capacity} = 2$, cola $A$, cabeza $B$, $\texttt{tail} = 0$, $\texttt{data} = [A, B]$.
 
-\sub{e}{Invariantes y corrección}
-\begin{enumerate}[label=\textbf{S\arabic*.}]
-\item
-\item
-\item
-\item
-\end{enumerate}
-% Preservacion en addHead / removeTail / resize.
-
-
-\sub{f}{Traza}
-% Estado tras cada movimiento (size despues de removeTail). Celdas vacias con ``$-$''.
-\par\smallskip
-\renewcommand{\arraystretch}{1.9}
-\begin{tabular}{@{}L{2.3cm}L{4.6cm}c c c L{1.9cm}L{3cm}@{}}
+\renewcommand{\arraystretch}{1.3}
+{\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}L{1cm}L{2cm}L{6cm}L{1cm}L{1cm}L{1.2cm}L{1.6cm}@{}}
 \toprule
-Mov. & Arreglo físico & \texttt{start} & \texttt{size} & \texttt{capacity} & ¿resize? & Orden lógico\\
+Mov. & Acción & \texttt{data} & \texttt{tail} & \texttt{size} & \texttt{cap.} & ¿Resize? \\
 \midrule
-inicial      & & & & & & \\
-N1 (no come) & & & & & & \\
-N2 (come)    & & & & & & \\
-N3 (no come) & & & & & & \\
-N4 (no come) & & & & & & \\
-N5 (come)    & & & & & & \\
-N6 (no come) & & & & & & \\
+--- & inicial &
+$[A,B]$ &
+0 & 2 & 2 & --- \\
+
+$N_1$ & no come &
+$[\text{null},B,C,\text{null}]$ &
+1 & 2 & 4 & \textbf{Sí} \\
+
+$N_2$ & come &
+$[\text{null},B,C,D]$ &
+1 & 3 & 4 & No \\
+
+$N_3$ & no come &
+$[E,\text{null},C,D]$ &
+2 & 3 & 4 & No \\
+
+$N_4$ & no come &
+$[E,F,\text{null},D]$ &
+3 & 3 & 4 & No \\
+
+$N_5$ & come &
+$[E,F,G,D]$ &
+3 & 4 & 4 & No \\
+
+$N_6$ & no come &
+$[\text{null},E,F,G,H,\text{null},\text{null},\text{null}]$ &
+1 & 4 & 8 & \textbf{Sí} \\
+
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \renewcommand{\arraystretch}{1}
+
+
 
 % Observaciones por movimiento (resize en N1, envoltura en N3--N4, resize con envoltura en N6).
 
