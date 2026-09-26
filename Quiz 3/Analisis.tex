@@ -155,34 +155,44 @@ N6 (no come) & & & & & & \\
 %=====================================================================
 \section*{P4 --- Análisis amortizado}
 
-\sub{a}{Aggregate Method}
-% Longitud maxima transitoria n <= g+3. Capacidades en cada resize. Sumar copias en funcion de g.
+\subsection*{a) Aggregate Method}
 
-
-\sub{b}{Suma geométrica}
-% Por que cada termino es la capacidad vigente exactamente cuando ocurre el resize.
-% No basta escribir 1+2+4+...=O(n).
-
-
-\sub{c}{Costo total y amortizado de \texttt{addHead}}
-% T(m) y T(m)/m.
-
-
-\sub{d}{Papel de $m$ y $g$}
-% Que parte del costo depende de m y cual de g.
-
-
-\sub{e}{Método del potencial}
+La longitud inicial es $2$ y cada manzana suma $1$, pero como \texttt{addHead} va antes de \texttt{removeTail}, el tamaño pasa transitoriamente de $k$ a $k+1$. Por eso la longitud máxima transitoria es $n_{\max} = g + 3 = O(g)$. Con $C_0 = 2$ al ir duplicando la \texttt{capacity}, las capacidades son $2, 4, 8, \dots, 2^{r+1}$. Un resize se ejecuta cuando $\texttt{size} = \texttt{capacity}$, y en ese momento se copian exactamente $C_j$ elementos. Como la estructura nunca supera $n_{\max}$, hay $r = O(\log g)$ resizes y el total de copias es:
 \[
-\Phi(\texttt{size},C)=
+\sum_{j=0}^{r-1} 2^{j+1} = 2^{r+1} - 2 < 2\,n_{\max} = O(g).
 \]
-\begin{itemize}
-\item \texttt{addHead} sin resize:
-\item \texttt{resize}:
-\item \texttt{removeTail}:
-\end{itemize}
-% Suma de costos amortizados vs. reales (Phi_0, Phi_fin).
-% Suficiencia del potencial pese a que removeTail elimina elementos.
+\textbf{Resultado:} el total de copias es lineal en $g$, es decir $O(g)$.
+
+\subsection*{b) Suma geométrica}
+
+La capacidad solo cambia en un \texttt{resize}, y entre el \texttt{resize} $j$ y el $j+1$ vale $C_j$. El \texttt{resize} $j \to j+1$ se ejecuta cuando $\texttt{size} = C_j$, así que en ese instante el arreglo está lleno y se copian exactamente $C_j$ elementos. Por el proceso de duplicación, esos valores son $2, 4, 8, \dots, 2^{r}$. La suma es geométrica de razón $2$:
+\[
+\sum_{j=0}^{r-1} 2^{j+1} = 2^{r+1} - 2 < 2 \cdot 2^{r} = 2\,C_{r-1}.
+\]
+El último término domina a todos los anteriores, así que la suma es proporcional al último término y no a la cantidad de términos. Como $C_{r-1} = O(g)$, el total de copias es $O(g)$.
+
+\subsection*{c) Costo total y amortizado de \texttt{addHead}}
+
+El costo total real de $m$ movimientos se descompone en $O(m)$ por los \texttt{addHead} (escritura $+$ índices), $O(m)$ por los \texttt{removeTail} (leer, poner \texttt{null}, avanzar índice) y $O(g)$ por las copias de los \texttt{resizes}. Entonces $T(m) = O(m) + O(g) = O(m+g) = O(m)$, usando $g \le m$. El costo amortizado de \texttt{addHead} es $T(m)/m = O(m+g)/m = O(1)$. Aunque un \texttt{addHead} individual cueste $O(n)$ en el peor caso por un \texttt{resize}, su costo amortizado es constante.
+
+\subsection*{d) Papel de $m$ y $g$}
+
+$m$ y $g$ miden cosas distintas. $m$ controla el trabajo por operación: cada \texttt{MOVE} hace un \texttt{addHead} y, si no come, un \texttt{removeTail}, ambos $O(1)$; esta es la parte del costo que depende de cuántas operaciones se hacen. $g$ controla el crecimiento: la longitud máxima transitoria es $g+3$, la capacidad final es $O(g)$, hay $O(\log g)$ \texttt{resizes} y $O(g)$ copias; esta es la parte del costo que depende del tamaño alcanzado. La descomposición es $T(m) = O(m) + O(g)$. Como $g \le m$, el total es $O(m)$, pero las dos fuentes son conceptualmente independientes: con $g = 0$ no hay resizes; con $g \approx m$ hay $O(\log m)$ \texttt{resizes} pero el costo sigue siendo lineal en $m$.
+
+\subsection*{e) Método del potencial}
+
+Se elige $\Phi(\texttt{size}, C) = 2\cdot\texttt{size} - C$. Justo después de un \texttt{resize} (con $\texttt{size} = C_{\text{old}}$, $C_{\text{new}} = 2C_{\text{old}}$) el potencial vale $\Phi = 0$; justo antes, con $\texttt{size} = C$, vale $\Phi = C$, suficiente para pagar las $C$ copias. El costo amortizado es $\hat{c} = c + \Delta\Phi$.
+
+\[
+\begin{array}{c|c|c}
+\text{Operación}&\Delta\Phi&\hat c\\ \hline
+\texttt{addHead} \text{ sin resize}&2&1+2=3\\
+\texttt{addHead} \text{ con resize}&2-C&(C+1)+(2-C)=3\\
+\texttt{removeTail}&-2&1-2=-1
+\end{array}
+\]
+
+La suficiencia del potencial frente a \texttt{removeTail} se justifica porque esta operación \textbf{no libera capacidad}, así que no ejecuta \texttt{resizes} ni copias; solo reduce el potencial en $2$, es decir, devuelve crédito sin consumirlo. Como el potencial solo se gasta en los resizes (donde $\Delta\Phi \approx -C$) y cada resize ocurre cuando $\Phi = C$, el crédito acumulado siempre alcanza. En general, $\sum_{i=1}^{t} \hat{c}_i = \sum_{i=1}^{t} c_i + \Phi_t - \Phi_0$, con $\Phi_0 = 2$ y $\Phi_t \le 2\cdot\texttt{size}_t = O(g)$, de donde $\sum c_i = O(m)$, coherente con el método agregado. El costo amortizado por operación es $O(1)$.
 
 
 %=====================================================================
