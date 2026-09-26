@@ -1,2 +1,9 @@
-public record Position(int row, int column) {
+public class Position {
+    int x;
+    int y;
+
+    Position(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 }

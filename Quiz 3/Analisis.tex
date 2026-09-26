@@ -82,26 +82,17 @@ cuando hago append si $size$ < a $capacity$ entonces solo tengo que hacer una op
 \section*{P2 --- Snake sobre \texttt{DynamicArray} con desplazamiento}
 
 \sub{a}{Costo de \texttt{removeTail}}
-% Iteraciones del bucle cuando size = k+1.
-
 cuando se llama a remove tail en esa implementacion, toca eliminar la cola y luego, reasignar los valores que quedan una posicion hacia atras, el costo seria O(n -1) -> O(n), con n siendo el size.
 
 \sub{b}{Costo total de $m$ movimientos}
-% Longitud constante k. Sumar append + desplazamiento (+ resize inicial).
-
 siendo de longitud $k$, hacer $m$ movimientos seria que en cada movimiento tengo el costo $O(k)$ de mover la serpiente, m veces esto, osea el costo final seria $O(k \cdot m)$
 
 \sub{c}{Validez de la afirmación} % por hacer
-% Veredicto + prueba formal. Costo(MOVE) = append + RemoveTail.
-% Comparar sum a_i con sum r_i.
-
 esto es falso, $move()$ no es amortizado porque en cada operacion de $move()$ tengo que hacer n (size) actualizaciones de posicion de la serpiente lo que hace que en promedio sea $\frac{O(n \cdot n)}{n} \rightarrow O(n)$ veces el costo amortizado, a diferencia del append, que en n operaciones el coste es $\frac{O(2n) + O(n)}{n} \rightarrow O(3) \rightarrow O(1)$
 
 
 \sub{d}{Bottleneck} % por hacer
-% Que fija la representacion y por que obliga a mover k elementos.
-
-el bottleneck seria que como en cado movimiento que no coma tengo que hacer $eliminarCola()$ entonces tendria n para ajustar el array dado que la nueva cola debe estar en la posicion 0, pero a su vez como esta en movimiento tengo que hacer n operaciones de calcular su nueva posicion, esto haria que para m operaciones sin comer tendria (n+n)*m operaciones
+el bottleneck seria que como en cado movimiento que no coma tengo que hacer $eliminarCola()$ entonces tendria n para ajustar el array dado que la nueva cola debe estar en la posicion 0, pero a su vez como esta en movimiento tengo que hacer n operaciones de calcular su nueva posicion, esto haria que para m operaciones sin comer tendria $(n+n) \cdot m$ operaciones
 
 %=====================================================================
 \section*{P3 --- Rediseño: representación interna}

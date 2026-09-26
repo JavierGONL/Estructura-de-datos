@@ -1,0 +1,22 @@
+# Archivos de compilación Java
+*.class
+*.jar
+
+# Archivos temporales de LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Archivos de editor / sistema
+.DS_Store
+Thumbs.db
+
+# Carpetas de salida
+bin/
+out/
+build/
+target/
