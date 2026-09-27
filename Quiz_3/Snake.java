@@ -8,18 +8,16 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
     public int size;
     public int capacity;
     public int posTail;
-    public int posHead;
     public String[][] cuadricula;
     public int cuadriculaSize;
     public Position[] frutas;
 
     public Snake(int cuadriculaSize, Position[] frutas) {
-        this.data = new Position[2];
-        this.capacity = 2;
         this.size = 2;
         this.posTail = 0;
+        this.capacity = 2;
+        this.data = new Position[2];
         data[0] =  new Position(cuadriculaSize/2, cuadriculaSize/2);
-        this.posHead = 1;
         data[1] =  new Position(cuadriculaSize/2, cuadriculaSize/2 + 1);
         this.cuadricula = new String[cuadriculaSize][cuadriculaSize];
         this.cuadriculaSize = cuadriculaSize;
@@ -55,11 +53,9 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
 
         if (size == 0) {
             data[posTail] = value;
-            posHead = posTail;
         } 
         else {
-            posHead = (posHead + 1) % capacity;
-            data[posHead] = value;
+            data[(posTail + size) % capacity] = value;
         }
 
         size++;
@@ -75,7 +71,7 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         size--;
 
         if (size == 0) { // manejar el caso vacio
-            posHead = posTail;
+            posTail = 0;
         }
     }
 
@@ -87,7 +83,6 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
 
         data = temporalArray;
         posTail = 0;
-        posHead = size - 1;
         capacity = newCapacity;
     }
 
@@ -116,7 +111,7 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
     }
 
     public void actualizarPosiciones(Position input) {
-        Position newHead = new Position(data[posHead].x + input.x, data[posHead].y + input.y);
+        Position newHead = new Position(data[(posTail + (size - 1)) % capacity].x + input.x, data[(posTail + (size - 1)) % capacity].y + input.y);
         if (newHead.x < 0 || newHead.x >= cuadriculaSize || newHead.y < 0 || newHead.y >= cuadriculaSize) {
             throw new IllegalArgumentException("La serpiente salio de la cuadricula");
         }

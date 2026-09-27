@@ -1,4 +1,20 @@
 public class Main {
+    private static String nombrePosicion(Position position) {
+        if (position == null) {
+            return "null";
+        }
+
+        if (position.x == 5 && position.y == 5) return "A";
+        if (position.x == 5 && position.y == 6) return "B";
+        if (position.x == 5 && position.y == 7) return "N1";
+        if (position.x == 5 && position.y == 8) return "N2";
+        if (position.x == 6 && position.y == 8) return "N3";
+        if (position.x == 7 && position.y == 8) return "N4";
+        if (position.x == 7 && position.y == 7) return "N5";
+        if (position.x == 7 && position.y == 6) return "N6";
+        return "(" + position.x + "," + position.y + ")";
+    }
+
     public static void main(String[] args) {
         
         Position[] frutas = {
@@ -21,56 +37,33 @@ public class Main {
         String[] movs = {"N1", "N2", "N3", "N4", "N5", "N6"};
         String[] acciones = {"no come", "come", "no come", "no come", "come", "no come"};
 
-        System.out.println("Mov. | Acción    | data                               | tail | size | cap. | ¿Resize?");
-        System.out.println("----------------------------------------------------------------------------------------");
-
-        // Impresión directa del estado inicial
-        System.out.print("---  | inicial  | [");
-        for (int j = 0; j < s.capacity(); j++) {
-            if (s.data[j] == null) {
-                System.out.print("null");
-            } else if (s.data[j].x == 5 && s.data[j].y == 5) {
-                System.out.print("A");
-            } else if (s.data[j].x == 5 && s.data[j].y == 6) {
-                System.out.print("B");
-            }
-            if (j < s.capacity() - 1) System.out.print(", ");
-        }
-        System.out.println("] | " + s.posTail + "    | " + s.size() + "    | " + s.capacity() + "    | No");
-
-        // Ciclo de movimientos llamando a tu método actualizarPosiciones
         for (int i = 0; i < movimientos.length; i++) {
             int capAntes = s.capacity();
-
-            // Ejecuta tu función
             s.actualizarPosiciones(movimientos[i]);
+            s.actualizarCuadricula();
 
-            boolean resize = (s.capacity() != capAntes);
-
-            String acc = acciones[i];
-            String espaciado = acc.equals("come") ? "    | [" : " | [";
-            System.out.print(movs[i] + "   | " + acc + espaciado);
-
-            // Mapeo directo de coordenadas a letras A-H
-            for (int j = 0; j < s.capacity(); j++) {
-                if (s.data[j] == null) {
-                    System.out.print("null");
-                } else {
-                    int x = s.data[j].x;
-                    int y = s.data[j].y;
-                    if (x == 5 && y == 5) System.out.print("A");
-                    else if (x == 5 && y == 6) System.out.print("B");
-                    else if (x == 5 && y == 7) System.out.print("C");
-                    else if (x == 5 && y == 8) System.out.print("D");
-                    else if (x == 6 && y == 8) System.out.print("E");
-                    else if (x == 7 && y == 8) System.out.print("F");
-                    else if (x == 7 && y == 7) System.out.print("G");
-                    else if (x == 7 && y == 6) System.out.print("H");
-                    else System.out.print("(" + x + "," + y + ")");
+            System.out.println(movs[i] + " -> " + acciones[i]);
+            System.out.println("Tablero:");
+            for (int fila = 0; fila < s.cuadriculaSize; fila++) {
+                for (int columna = 0; columna < s.cuadriculaSize; columna++) {
+                    String celda = s.cuadricula[fila][columna];
+                    System.out.print(celda == null ? ". " : celda + " ");
                 }
-                if (j < s.capacity() - 1) System.out.print(", ");
+                System.out.println();
             }
-            System.out.println("] | " + s.posTail + "    | " + s.size() + "    | " + s.capacity() + "    | " + (resize ? "Sí" : "No"));
+            System.out.print("Después del movimiento: data = [");
+            for (int j = 0; j < s.capacity(); j++) {
+                System.out.print(nombrePosicion(s.data[j]));
+                if (j < s.capacity() - 1) {
+                    System.out.print(", ");
+                }
+            }
+            System.out.println("]");
+            System.out.println("posTail = " + s.posTail);
+            System.out.println("size = " + s.size());
+            System.out.println("capacity = " + s.capacity());
+            System.out.println("resize = " + (s.capacity() != capAntes ? "Sí" : "No"));
+            System.out.println();
         }
     }
 }
