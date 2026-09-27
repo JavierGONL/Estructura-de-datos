@@ -2,18 +2,18 @@ import java.util.Scanner;
 import java.util.Random;
 
 public class Snake { // hacer un array circular, elimino el invariante de data[0] = Tail
-    private final Scanner scanner = new Scanner(System.in);
-    private final Random random = new Random();
-    private Position[] data; // quiero guardar en data la pos de los segmentos de la serpiente
-    private int size;
-    private int capacity;
-    private int posTail;
-    private int posHead;
+    public final Scanner scanner = new Scanner(System.in);
+    public final Random random = new Random();
+    public Position[] data; // quiero guardar en data la pos de los segmentos de la serpiente
+    public int size;
+    public int capacity;
+    public int posTail;
+    public int posHead;
     public String[][] cuadricula;
     public int cuadriculaSize;
-    public Position[] fruits;
+    public Position[] frutas;
 
-    public Snake(int cuadriculaSize, int amountfruits) {
+    public Snake(int cuadriculaSize, Position[] frutas) {
         this.data = new Position[2];
         this.capacity = 2;
         this.size = 2;
@@ -23,15 +23,14 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         data[1] =  new Position(cuadriculaSize/2, cuadriculaSize/2 + 1);
         this.cuadricula = new String[cuadriculaSize][cuadriculaSize];
         this.cuadriculaSize = cuadriculaSize;
-        this.fruits = new Position[amountfruits];
-        frutas();
+        this.frutas = frutas;
     }
 
     public int size() {
         return size;
     }
 
-    private int capacity() {
+    public int capacity() {
         return capacity;
     }
 
@@ -80,7 +79,7 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         }
     }
 
-    private void resize(int newCapacity) { // al hacer el resize debo copiar el orden de la snake como estaba
+    public void resize(int newCapacity) { // al hacer el resize debo copiar el orden de la snake como estaba
         Position[] temporalArray = new Position[newCapacity];
         for (int i = 0; i < size; i++) {
             temporalArray[i] = data[(posTail + i) % capacity];
@@ -99,7 +98,7 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
             }
         }
 
-        for (Position fruit : fruits) {
+        for (Position fruit : frutas) {
             if (fruit != null) {
                 cuadricula[fruit.x][fruit.y] = "f";
             }
@@ -116,27 +115,6 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         }
     }
 
-    public Position LeerInput() {
-        System.out.print("Movimiento (W/A/S/D): ");
-        char c = Character.toLowerCase(scanner.next().charAt(0));
-
-        if (c == 'a') {
-            return new Position(0, -1);
-        } 
-        else if (c == 'd') {
-            return new Position(0, 1);
-        } 
-        else if (c == 'w') {
-            return new Position(-1, 0);
-        } 
-        else if (c == 's') {
-            return new Position(1, 0);
-        } 
-        else {
-            return new Position(0, 0);
-        }
-    }
-
     public void actualizarPosiciones(Position input) {
         Position newHead = new Position(data[posHead].x + input.x, data[posHead].y + input.y);
         if (newHead.x < 0 || newHead.x >= cuadriculaSize || newHead.y < 0 || newHead.y >= cuadriculaSize) {
@@ -150,17 +128,8 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         }
     }
 
-    public void frutas() {
-        for (int i = 0; i < fruits.length; i++) {
-            Position fruit;
-            do {
-                fruit = new Position(random.nextInt(cuadriculaSize), random.nextInt(cuadriculaSize));
-            } while (occupiedBySnake(fruit) || occupiedByFruit(fruit, i));
-            fruits[i] = fruit;
-        }
-    }
 
-    private boolean occupiedBySnake(Position position) {
+    public boolean occupiedBySnake(Position position) {
         for (int i = 0; i < size; i++) {
             Position segmento = data[(posTail + i) % capacity];
             if (segmento.x == position.x && segmento.y == position.y) {
@@ -170,9 +139,9 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         return false;
     }
 
-    private boolean occupiedByFruit(Position position, int limit) {
+    public boolean occupiedByFruit(Position position, int limit) {
         for (int i = 0; i < limit; i++) {
-            Position currentFruit = fruits[i];
+            Position currentFruit = frutas[i];
             if (currentFruit != null && currentFruit.x == position.x && currentFruit.y == position.y) {
                 return true;
             }
@@ -180,11 +149,11 @@ public class Snake { // hacer un array circular, elimino el invariante de data[0
         return false;
     }
 
-    private boolean removeFruit(Position position) {
-        for (int i = 0; i < fruits.length; i++) {
-            Position currentFruit = fruits[i];
+    public boolean removeFruit(Position position) {
+        for (int i = 0; i < frutas.length; i++) {
+            Position currentFruit = frutas[i];
             if (currentFruit != null && currentFruit.x == position.x && currentFruit.y == position.y) {
-                fruits[i] = null;
+                frutas[i] = null;
                 return true;
             }
         }
