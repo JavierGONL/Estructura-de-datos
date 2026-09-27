@@ -1,7 +1,7 @@
 import java.util.Scanner;
 import java.util.Random;
 
-public class snake { // hacer un array circular, elimino el invariante de data[0] = Tail
+public class Snake { // hacer un array circular, elimino el invariante de data[0] = Tail
     private final Scanner scanner = new Scanner(System.in);
     private final Random random = new Random();
     private Position[] data; // quiero guardar en data la pos de los segmentos de la serpiente
@@ -13,7 +13,7 @@ public class snake { // hacer un array circular, elimino el invariante de data[0
     public int cuadriculaSize;
     public Position[] fruits;
 
-    public snake(int cuadriculaSize, int amountfruits) {
+    public Snake(int cuadriculaSize, int amountfruits) {
         this.data = new Position[2];
         this.capacity = 2;
         this.size = 2;
