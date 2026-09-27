@@ -23,14 +23,18 @@
 \newcommand{\sub}[2]{\medskip\par\noindent\textbf{#1) #2.}\ }
 
 \begin{document}
-
 \begin{center}
-{\Large\bfseries Estructuras de Datos --- Quiz 03}\\[1pt]
-{\large Dynamic Arrays and Amortized Analysis} \quad$\cdot$\quad analysis.pdf \quad$\cdot$\quad Semestre 2026-2
+{\Large\bfseries Dynamic Arrays and Amortized Analysis --- Quiz 03}\\[1pt]
 \end{center}
 \vspace{-6pt}
-\textbf{Nombres:} Kevin Javier Gonzalez, Iván Felipe Maluche Suarez, Angelica Pascagaza Vega \hfill \textbf{Documento:} 1093432420 \hfill \textbf{Grupo:} 3
-
+\begin{center}
+{\small
+\begin{tabular}{@{}c@{\hspace{1cm}}c@{\hspace{1cm}}c@{}}
+\textbf{Kevin Javier Gonzalez} & \textbf{Iván Felipe Maluche Suarez} & \textbf{Angelica Pascagaza Vega} \\
+\multicolumn{3}{c}{ Estructuras de Datos \qquad Grupo 3 \quad Semestre 2026-2}
+\end{tabular}}
+\end{center}
+ 
 \section*{Notación y modelo de costo}
 
 %=====================================================================
@@ -42,16 +46,18 @@ En el archivo de DynamicArray.Java se encuentra la implementacion del arreglo di
 
 \sub{b}{Invariantes}
 
-\begin{enumerate}[label=\textbf{I\arabic*.}]
-\item $$0 \leq size \leq capacity$$
-\item $$ capacity \geq 1$$
-\item $$ index \in [0, size), data[size] == null $$
+\begin{enumerate}[label=\textbf{I\arabic*.}, nosep]
+\item $0 \leq \texttt{size} \leq \texttt{capacity}$
+\item $\texttt{capacity} \geq 1$
+\item $\texttt{index} \in [0,\texttt{size})$ y $\texttt{data}[n] == \texttt{null}$ para $n \in [\texttt{size},\texttt{capacity})$
 \end{enumerate}
 % Justificar la preservacion en append / removeLast / resize.
 
 
 \sub{c}{Complejidad worst-case}\par\smallskip
 \renewcommand{\arraystretch}{2}
+\begin{center}
+\small
 \begin{tabular}{@{}L{0.16\textwidth}L{0.2\textwidth}L{0.55\textwidth}@{}}
 \toprule
 Operación & Worst-case & Justificación\\
@@ -62,6 +68,7 @@ Operación & Worst-case & Justificación\\
 \texttt{removeLast} & $\Theta(1)$ & Tal como el caso de get y set consiste en guardar el ultimo valor, asginarle un nulo y disminuir size, siendo operaciones que me dan una cota constante.\\
 \bottomrule
 \end{tabular}
+\end{center}
 \renewcommand{\arraystretch}{1}
 
 
@@ -147,6 +154,8 @@ Estado inicial: $\texttt{size} = \texttt{capacity} = 2$, cola $A$, cabeza $B$, $
 
 \renewcommand{\arraystretch}{1.3}
 {\setlength{\tabcolsep}{4pt}
+\begin{center}
+\small
 \begin{tabular}{@{}L{1cm}L{2cm}L{6cm}L{1cm}L{1cm}L{1.2cm}L{1.6cm}@{}}
 \toprule
 Mov. & Acción & \texttt{data} & \texttt{tail} & \texttt{size} & \texttt{cap.} & ¿Resize? \\
@@ -180,7 +189,8 @@ $[\text{null},E,F,G,H,\text{null},\text{null},\text{null}]$ &
 1 & 4 & 8 & \textbf{Sí} \\
 
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{center}}
 \renewcommand{\arraystretch}{1}
 
 
@@ -252,6 +262,8 @@ En los tres casos el costo amortizado por crecimiento es el total de copias divi
 
 \renewcommand{\arraystretch}{1.4}
 {\setlength{\tabcolsep}{4pt}
+\begin{center}
+\small
 \begin{tabular}{@{}L{1.7cm}L{2.1cm}L{2cm}L{2.4cm}L{2.8cm}@{}}
 \toprule
 Política & \# Resizes & Total copias & Costo amortizado & Espacio sin usar tras resize \\
@@ -260,7 +272,8 @@ $C+1$              & $\Theta(n)$      & $\Theta(n^2)$ & $\Theta(n)$ & $0$ \ ($0\
 $2C$               & $\Theta(\log n)$ & $\Theta(n)$   & $\Theta(1)$ & $\approx C/2$ \ ($\approx 50\%$) \\
 $\lceil 1.5C\rceil$ & $\Theta(\log n)$ & $\Theta(n)$   & $\Theta(1)$ & $\approx C/3$ \ ($\approx 33\%$) \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{center}}
 \renewcommand{\arraystretch}{1}
 
 \subsection*{f) Trade-off}

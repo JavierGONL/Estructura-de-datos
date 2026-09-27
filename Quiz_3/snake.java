@@ -12,10 +12,8 @@ public class snake { // hacer un array circular, elimino el invariante de data[0
     public String[][] cuadricula;
     public int cuadriculaSize;
     public Position[] fruits;
-    public int counter;
-    public int paso;
 
-    public snake(int cuadriculaSize, int amountfruits, int paso) {
+    public snake(int cuadriculaSize, int amountfruits) {
         this.data = new Position[2];
         this.capacity = 2;
         this.size = 2;
@@ -26,8 +24,6 @@ public class snake { // hacer un array circular, elimino el invariante de data[0
         this.cuadricula = new String[cuadriculaSize][cuadriculaSize];
         this.cuadriculaSize = cuadriculaSize;
         this.fruits = new Position[amountfruits];
-        this.counter = 0;
-        this.paso = paso;
         frutas();
     }
 
@@ -152,11 +148,6 @@ public class snake { // hacer un array circular, elimino el invariante de data[0
         if (!ateFruit) {
             removeTail();
         }
-
-        if (this.counter % paso == 0) {
-            removeTail();
-        }
-        counter++;
     }
 
     public void frutas() {
@@ -181,8 +172,8 @@ public class snake { // hacer un array circular, elimino el invariante de data[0
 
     private boolean occupiedByFruit(Position position, int limit) {
         for (int i = 0; i < limit; i++) {
-            Position fruit = fruits[i];
-            if (fruit != null && fruit.x == position.x && fruit.y == position.y) {
+            Position currentFruit = fruits[i];
+            if (currentFruit != null && currentFruit.x == position.x && currentFruit.y == position.y) {
                 return true;
             }
         }
@@ -191,8 +182,8 @@ public class snake { // hacer un array circular, elimino el invariante de data[0
 
     private boolean removeFruit(Position position) {
         for (int i = 0; i < fruits.length; i++) {
-            Position current = fruits[i];
-            if (current != null && current.x == position.x && current.y == position.y) {
+            Position currentFruit = fruits[i];
+            if (currentFruit != null && currentFruit.x == position.x && currentFruit.y == position.y) {
                 fruits[i] = null;
                 return true;
             }

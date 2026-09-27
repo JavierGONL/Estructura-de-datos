@@ -1,6 +1,6 @@
 public class main {
     public static void main(String[] args) {
-        snake s = new snake(10, 5,5);
+        snake s = new snake(10, 5);
 
         for (int i = 0; i < 10; i++) {
             System.out.println("Turno " + (i + 1));
