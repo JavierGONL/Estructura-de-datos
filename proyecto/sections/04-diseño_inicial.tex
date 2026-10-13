@@ -1,13 +1,20 @@
-\section{Resultados}
-\label{sec:resultados}
+\section{Diseño inicial de la solucion}
+\label{sec:diseño}
 
-Esta sección presenta los resultados obtenidos durante la evaluación de la
-solución.
+\subsection{Orden del proyecto del proyecto}
+Dentro de la carpeta src disponible junto con este documento se encuentra:
+\begin{itemize}
+    \item \textbf{graficador:} Contiene los archivos necesarios para graficar la señal ECG y obtener sus datos, no se ahondara directamente en su implementacion al no ser el objeto principal para las implemenaciones de estructuras de datos.
+    \item \textbf{LinkedList:} Contiene la implementacion de la estructura de datos Linked List generica.
+    \item \textbf{implementaciones:} Contendra las implementaciones de estructuras de datos y ADT genericas que se usaran para el proyecto, actualmente se encuentran una implementacion de Cqueues y CLinked List.
+    \item \textbf{DeteccionQRS.java:} Contiene el codigo que hace uso de las implementaciones y el graficador para filtrar y mantener un registro de los datos del ECG.
+\end{itemize}
 
-\subsection{Resultados principales}
+\subsection{Loop basico de la implementacion}
+Por medio del lo archivos dispuestos en la carpeta "graficador" se crea un objeto capaz de graficar correctamente el ECG y entregar sus datos, teniendo esto y las respectivas implementaciones de Linked list y circular queue el archivo analisisECG.java se encarga de filtrar los datos por medio de la cqueue
+y mantener un registro de estos en la linked list. Hecho esto se realizan los calculos y se entregan las propiedades en termianl mientras que la grafica se mantiene en una ventana emergente.
 
-\textbf{[Presentar los resultados más importantes de forma clara y objetiva.
-Evitar interpretar aquí los resultados en exceso.]}
+\subsection{}
 
 \begin{table}[ht]
 \caption{Plantilla para resumir los resultados}
