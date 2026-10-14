@@ -1,7 +1,7 @@
 \section*{Pseudocódigo del Algoritmo Pan-Tompkins}
 
 \subsection{1. Etapas de Filtrado y Procesamiento}
-
+En esta primera etapa se desarrollaron las funciones de filtrado de datos y procesamiento de muestras para despues ser aplicadas con la ADT
 \begin{algorithm}[H]
 \caption{Procesamiento de Muestra}
 \begin{algorithmic}[1]
@@ -73,7 +73,7 @@
 \end{algorithm}
 
 \subsection{2. Fase de Decisión y Lógica de Umbrales}
-
+En esta parte del algoritmo a partir de los umbrales se decide el tipo de entrada y se clasifica, actualizando los umbrales a partir de la informacion obtenida por este proceso.
 \begin{algorithm}[H]
 \caption{Fase de Decisión}
 \begin{algorithmic}[1]
@@ -109,7 +109,7 @@
 \end{algorithm}
 
 \subsection{3. Clasificación de Picos y Searchback}
-
+Este ultimo bloque del algoritmo se encarga de clasificar el tipo de pico a base de su pentiente y nuevamente actualizar los umbrales a partir de la informacion obtenida
 \begin{algorithm}[H]
 \caption{Clasificación de Picos y Searchback}
 \begin{algorithmic}[1]
