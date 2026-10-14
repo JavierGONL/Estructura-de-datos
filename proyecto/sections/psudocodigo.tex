@@ -1,0 +1,153 @@
+\section*{Pseudocódigo del Algoritmo Pan-Tompkins}
+
+\subsection{1. Etapas de Filtrado y Procesamiento}
+
+\begin{algorithm}[H]
+\caption{Procesamiento de Muestra}
+\begin{algorithmic}[1]
+\Function{ProcesarMuestra}{$m$}
+    \If{not tieneOffset}
+        \State offset $\leftarrow$ $m$
+        \State tieneOffset $\leftarrow$ true
+    \EndIf
+    \State $m \leftarrow m - offset$
+    \State pb $\leftarrow$ \Call{PasaBajos}{$m$}
+    \State pa $\leftarrow$ \Call{PasaAltos}{pb}
+    \State derivar $\leftarrow$ \Call{Derivada}{pa}
+    \State elevarCuadrado $\leftarrow$ \Call{Cuadrado}{derivar}
+    \State ventana $\leftarrow$ \Call{IntegracionVentana}{elevarCuadrado}
+    \State \Return ventana
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Filtro Pasa-Bajos}
+\begin{algorithmic}[1]
+\Function{PasaBajos}{$x$}
+    \State Desplazar y almacenar $x$ en buffer Pasa-Bajos
+    \State $y \leftarrow 2 \cdot y[n-1] - y[n-2] + x[n] - 2 \cdot x[n-6] + x[n-12]$
+    \State Almacenar $y$ en buffer de salidas Pasa-Bajos
+    \State \Return $y$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Filtro Pasa-Altos}
+\begin{algorithmic}[1]
+\Function{PasaAltos}{$x$}
+    \State Desplazar y almacenar $x$ en buffer Pasa-Altos
+    \State $y \leftarrow y[n-1] - \frac{x[n]}{32.0} + x[n-16] - x[n-15] + \frac{x[n-32]}{32.0}$
+    \State Almacenar $y$ en buffer de salidas Pasa-Altos
+    \State \Return $y$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Derivada}
+\begin{algorithmic}[1]
+\Function{Derivada}{$x$}
+    \State Desplazar y almacenar $x$ en buffer de Derivada
+    \State $y \leftarrow 0.125 \cdot (2 \cdot x[n] + x[n-1] - x[n-3] - 2 \cdot x[n-4])$
+    \State \Return $y$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Cuadrado e Integración de Ventana}
+\begin{algorithmic}[1]
+\Function{Cuadrado}{$x$}
+    \State \Return $x \cdot x$
+\EndFunction
+
+\Function{IntegracionVentana}{$x$}
+    \State datoAntiguo $\leftarrow$ Sacar el dato más antiguo del buffer de integración
+    \State suma\_int $\leftarrow$ suma\_int + $x$ - datoAntiguo
+    \State Desplazar y almacenar $x$ en buffer de integración
+    \State \Return suma\_int / window\_size
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{2. Fase de Decisión y Lógica de Umbrales}
+
+\begin{algorithm}[H]
+\caption{Fase de Decisión}
+\begin{algorithmic}[1]
+\Procedure{Decidir}{$v$}
+    \State pendMax $\leftarrow$ $\max(\text{pendMax}, v - prev1)$
+    \If{not inicializado}
+        \State maxInicializacion $\leftarrow$ $\max(\text{maxInicializacion}, v)$
+        \State sumaInicializacion $\leftarrow$ sumaInicializacion + $v$
+        \If{$n + 1 \geq \text{muestrasInicializacion}$}
+            \State spki $\leftarrow$ $0.25 \cdot \text{maxInicializacion}$
+            \State npki $\leftarrow$ $0.5 \cdot (\text{sumaInicializacion} / \text{muestrasInicializacion})$
+            \State \Call{ActualizarUmbrales}{}
+            \State pendMax $\leftarrow$ $0$
+            \State inicializado $\leftarrow$ true
+        \EndIf
+    \Else
+        \If{$prev1 > prev2$ and $prev1 \geq v$}
+            \State \Call{Clasificar}{$prev1, n - 1$}
+            \State pendMax $\leftarrow$ $0$
+        \EndIf
+        \State \Call{Searchback}{}
+    \EndIf
+    \State $prev2 \leftarrow prev1$
+    \State $prev1 \leftarrow v$
+    \State $n \leftarrow n + 1$
+\EndProcedure
+
+\Procedure{ActualizarUmbrales}{}
+    \State thresholdI $\leftarrow$ npki + $0.25 \cdot (spki - npki)$
+    \State thresholdII $\leftarrow$ $0.5 \cdot thresholdI$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{3. Clasificación de Picos y Searchback}
+
+\begin{algorithm}[H]
+\caption{Clasificación de Picos y Searchback}
+\begin{algorithmic}[1]
+\Procedure{Clasificar}{pico, idx}
+    \State periodoRefactor $\leftarrow$ $\text{round}(0.200 \cdot fs)$
+    \State ventanaT $\leftarrow$ $\text{round}(0.360 \cdot fs)$
+    \State desde $\leftarrow$ idx - ultimoQRS
+
+    \If{ultimoQRS $\geq 0$ and desde $<$ periodoRefactor}
+        \State \textbf{return}
+    \EndIf
+
+    \If{pico $>$ thresholdI}
+        \State ondaT $\leftarrow$ (ultimoQRS $\geq 0$) and (desde $<$ ventanaT) and (pendMax $< 0.5 \cdot pendQRS$)
+        \If{ondaT}
+            \State npki $\leftarrow$ $0.125 \cdot pico + 0.875 \cdot npki$
+        \Else
+            \State spki $\leftarrow$ $0.125 \cdot pico + 0.875 \cdot spki$
+            \State \Call{RegistrarQRS}{idx, pendMax}
+        \EndIf
+    \Else
+        \State npki $\leftarrow$ $0.125 \cdot pico + 0.875 \cdot npki$
+        \If{pico $>$ thresholdII and pico $>$ candPico}
+            \State candPico $\leftarrow$ pico
+            \State candIdx $\leftarrow$ idx
+            \State candPend $\leftarrow$ pendMax
+        \EndIf
+    \EndIf
+
+    \State \Call{ActualizarUmbrales}{}
+\EndProcedure
+
+\Procedure{Searchback}{}
+    \If{candIdx $\geq 0$ and haySuficientesIntervalosRR and $(n - ultimoQRS) > 1.66 \cdot rrReferencia()$}
+        \State spki $\leftarrow$ $0.25 \cdot candPico + 0.75 \cdot spki$
+        \State \Call{RegistrarQRS}{candIdx, candPend}
+        \State \Call{ActualizarUmbrales}{}
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
