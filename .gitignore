@@ -14,6 +14,7 @@
 # Archivos de editor / sistema
 .DS_Store
 Thumbs.db
+.venv/
 
 # Carpetas de salida
 bin/
@@ -21,3 +22,14 @@ out/
 build/
 target/
 *.pdf
+
+# Archivos comprimidos y paquetes
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+*.bz2
+*.xz
+*.7z
+*.rar
