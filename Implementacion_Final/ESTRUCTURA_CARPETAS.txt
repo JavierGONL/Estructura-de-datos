@@ -1,0 +1,135 @@
+ESTRUCTURA DE CARPETAS - IMPLEMENTACION_FINAL
+================================================
+
+Este archivo resume la organización del proyecto ECG Viewer y el contenido
+principal de cada carpeta. Los archivos de datos repetidos se describen por
+tipo y no se enumeran uno por uno.
+
+Implementacion_Final/
+|
+|-- pom.xml
+|   Configuración Maven: Java 25, PDFBox, JUnit, compilación y creación del
+|   JAR ejecutable.
+|
+|-- README.md
+|   Manual del proyecto: requisitos, comandos de ejecución, controles del
+|   visor, formatos WFDB y limitaciones conocidas.
+|
+|-- Pseudocodigos_ECG.md
+|   Pseudocódigos y explicación de los algoritmos relacionados con el ECG.
+|
+|-- src/
+|   Código fuente y pruebas del proyecto Maven.
+|   |
+|   |-- main/
+|   |   |
+|   |   |-- java/ecg/
+|   |   |   Código fuente principal de la aplicación.
+|   |   |   |
+|   |   |   |-- Main.java
+|   |   |   |   Punto de entrada. Abre la interfaz, genera demos, exporta PNG
+|   |   |   |   o ejecuta evaluaciones de rendimiento.
+|   |   |   |
+|   |   |   |-- modelo/
+|   |   |   |   Clases de datos del ECG: registro, canales, cabecera,
+|   |   |   |   anotaciones, configuración y resultados.
+|   |   |   |
+|   |   |   |-- lectura/
+|   |   |   |   Lectura y validación de archivos WFDB (.hea, .dat y .atr).
+|   |   |   |   Incluye decodificadores para formatos 8, 16, 212, 24 y 32.
+|   |   |   |
+|   |   |   |-- procesamiento/
+|   |   |   |   Análisis ECG, detección QRS/Pan-Tompkins, frecuencia cardiaca,
+|   |   |   |   intervalos RR, validación y fusión de detecciones.
+|   |   |   |
+|   |   |   |-- visualizacion/
+|   |   |   |   Paneles, renderizadores, cuadrícula ECG, zoom, desplazamiento,
+|   |   |   |   cursor, selección y anotaciones.
+|   |   |   |
+|   |   |   |-- interfaz/
+|   |   |   |   Ventanas y controles Swing: carga de registros, visor,
+|   |   |   |   selección de canales, exportación y rendimiento.
+|   |   |   |
+|   |   |   |-- exportacion/
+|   |   |   |   Generación de imágenes PNG, impresión estándar, exportación
+|   |   |   |   de la vista actual y exportación por páginas.
+|   |   |   |
+|   |   |   |-- rendimiento/
+|   |   |   |   Medición de tiempo, memoria y CPU; evaluación experimental;
+|   |   |   |   generación de informes PDF y gráficas.
+|   |   |   |
+|   |   |   `-- utilidades/
+|   |       Constantes, conversión de tiempo, gestión de archivos y rutas,
+|   |       generación de registros sintéticos y formato de datos.
+|   |   |
+|   |   `-- resources/
+|       Recursos adicionales usados durante la ejecución, si existen.
+|   |
+|   `-- test/java/ecg/
+|       Pruebas JUnit organizadas por área: lectura, procesamiento,
+|       visualización, exportación y rendimiento.
+|
+|-- data/
+|   Bases de datos y registros ECG de prueba.
+|   |
+|   |-- MIT-BIH Arrhythmia Database/
+|   |   Registros MIT-BIH. Cada registro normalmente contiene:
+|   |   .hea (cabecera), .dat (señal), .atr (anotaciones) y .xws (configuración).
+|   |
+|   |-- PTBDB/
+|   |   Registros de la base de datos diagnóstica PTB.
+|   |
+|   `-- PTBXL/
+|       Registros de la base de datos PTB-XL.
+|
+|-- files/
+|   Scripts auxiliares en Python para explorar y visualizar registros ECG.
+|   |
+|   |-- datos.py
+|   |   Utilidades para preparar o consultar datos.
+|   |-- etapa1_verificar.py
+|   |   Primera etapa: verificación de archivos y datos.
+|   |-- etapa2_leer_registro.py
+|   |   Segunda etapa: lectura de un registro ECG.
+|   |-- etapa3_visualizar.py
+|   |   Tercera etapa: visualización. Ejemplo: python etapa3_visualizar.py 100
+|   `-- requirements.txt
+|       Dependencias Python de estos scripts.
+|
+|-- exports/
+|   Archivos generados por la aplicación.
+|   |-- PNG/  Imágenes ECG exportadas.
+|   `-- PDF/  Informes de rendimiento exportados.
+|
+|-- Pruebas_Rendimiento/
+|   Informes y resultados de pruebas de rendimiento.
+|
+|-- lib/
+|   Bibliotecas externas o archivos JAR auxiliares, si se usan fuera de Maven.
+|
+|-- bin/
+|   Archivos compilados de una compilación alternativa o anterior.
+|
+|-- target/
+|   Salida generada por Maven. Incluye clases compiladas, pruebas, reportes
+|   Surefire y los JAR generados. Puede borrarse y regenerarse con Maven.
+|
+|-- .github/modernize/
+|   Archivos de configuración y resultados del proceso de modernización.
+|
+|-- .vscode/
+|   Configuración local del editor Visual Studio Code.
+|
+`-- src.tar.gz
+    Archivo comprimido de respaldo del código fuente.
+
+Comandos principales desde esta carpeta:
+
+  mvn package
+      Compila, ejecuta las pruebas y genera el JAR ejecutable en target/.
+
+  java -jar target/Implementacion_Final-1.0.0-jar-with-dependencies.jar --demo
+      Genera y abre un registro ECG sintético de demostración.
+
+  java -jar target/Implementacion_Final-1.0.0-jar-with-dependencies.jar
+      Abre la aplicación para seleccionar un archivo .hea.
