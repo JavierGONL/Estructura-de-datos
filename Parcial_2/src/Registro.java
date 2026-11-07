@@ -1,12 +1,3 @@
-/**
- * clase registro
- * tiene 3 estados -> PENDIENTE, ATENDIDO y CANCELADO, segun su estado
- * estado solo se puede consultar con el metodo estadoActual() 
- * y para actualizarlo solamente es usar el metodo cambiar estado:
- *      -> "P" es pendiente
- *      -> "A" es atendido
- *      -> "C" es cancelado
- */
 public class Registro {
     
     public  enum Estado { PENDIENTE, ATENDIDO, CANCELADO }
