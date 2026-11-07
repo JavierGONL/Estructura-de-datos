@@ -37,7 +37,9 @@ public class DynamicArray<T> implements Iterable<T> {
     }
 
     /**
-     * Elimina el primer elemento y desplaza los demás una posición a la izquierda.
+     * Qué hace: saca y devuelve el primer elemento (null si la lista está vacía).
+     * Cómo: guarda array[0] y llama a removeIdx(0), que corre todo a la izquierda: O(n). (Queue no la usa: tiene su propia
+     * forma de sacar en O(1).)
      */
     public T eliminarPrimero() {
         if (len == 0) return null;
@@ -46,10 +48,21 @@ public class DynamicArray<T> implements Iterable<T> {
         return first;
     }
 
+    // ---- Métodos de acceso "físico", solo para Queue (visibles en el paquete). ----
+    // Tratan el arreglo interno como un buffer circular: no usan ni actualizan len, así que
+    // en ese uso get(), length(), iterator() y toString() NO sirven (la lista "ve" 0 elementos).
+
+    /** Qué hace: devuelve el tamaño real del arreglo interno. Cómo: devuelve capacity. */
     int capacity() {
         return capacity;
     }
 
+    /**
+     * Qué hace: si el buffer circular está lleno, lo agranda al doble sin perder el orden de la cola.
+     * Cómo: si size < capacity no hace nada. Si no, crea un arreglo del doble y copia los size elementos en orden
+     * lógico: el que sale primero (posición head) pasa a la posición 0, el siguiente a la 1, etc., leyendo con
+     * (head + i) % capacity para respetar la vuelta. Queue pone después head en 0 y tail en size. O(n).
+     */
     void ensureCircularCapacity(int head, int size) {
         if (size < capacity) return;
 
@@ -62,14 +75,17 @@ public class DynamicArray<T> implements Iterable<T> {
         capacity = newCapacity;
     }
 
+    /** Qué hace: lee la casilla index del arreglo interno, sin validar contra len. Cómo: devuelve array[index]. */
     T getPhysical(int index) {
         return array[index];
     }
 
+    /** Qué hace: escribe element en la casilla index del arreglo interno. Cómo: asigna array[index]. */
     void setPhysical(int index, T element) {
         array[index] = element;
     }
 
+    /** Qué hace: libera la casilla index. Cómo: pone null para soltar la referencia y poder reutilizarla. */
     void clearPhysical(int index) {
         array[index] = null;
     }

@@ -8,6 +8,7 @@
  *  - El heap contiene solo los pendientes y es el que decide cuál es la siguiente tarea.
  */
 public class Sistema {
+    // aca se declaran las 4 estructuras, 
     private final ArbolGeneral arbol = new ArbolGeneral();
     private final BST bst = new BST();
     private final AVL avl = new AVL();
@@ -47,20 +48,37 @@ public class Sistema {
      * es nuevo y el padre ya existe, así que nunca se puede formar uno.
      */
     private String registrar(int id, String nombre, int prioridad, int padre) {
-        if (id <= 0) return "ERROR: id invalido (" + id + ")";
-        if (avl.search(id)) return "ERROR: ID duplicado (" + id + ")";
-        if (prioridad < 1 || prioridad > 10) return "ERROR: prioridad invalida (" + prioridad + ")";
-        if (padre < 0) return "ERROR: padre invalido (" + padre + ")";
-        if (padre == 0) {
-            if (arbol.idRaiz() != 0) return "ERROR: ya existe una raiz (" + arbol.idRaiz() + ")";
-        } else if (!avl.search(padre)) {
+        // edge cases
+        if (id <= 0) { // el id no puede ser menor o igual a 0
+            return "ERROR: id invalido (" + id + ")";
+        }
+
+        if (avl.search(id)) { // no se permiten duplicados
+            return "ERROR: ID duplicado (" + id + ")";
+        }
+
+        if (prioridad < 1 || prioridad > 10) { // como maximo se permite hasta 10 de dificultad
+            return "ERROR: prioridad invalida (" + prioridad + ")";
+        }
+        if (padre < 0) { // por lo mismo que id > 0, el padre debe ser >=0, 0 es la raiz
+            return "ERROR: padre invalido (" + padre + ")";
+        }
+
+        if (padre == 0) { // solo hay una raiz
+            if (arbol.idRaiz() != 0) {
+                return "ERROR: ya existe una raiz (" + arbol.idRaiz() + ")";
+            }
+        } 
+        else if (!avl.search(padre)) { // no existe el padre
             return "ERROR: el padre " + padre + " no existe";
         }
+
+        // ahora el registro tiene que entrar en las 4 estructuras 
         Registro r = new Registro(id, nombre, prioridad, padre);
-        arbol.insercion(r);
-        bst.insercion(r);
-        avl.insercion(r);
-        heap.insert(r);
+        arbol.insercion(r); // Representa la jerarquía de tareas: una tarea y sus subtareas
+        bst.insercion(r); // el bst como que solo esta para comparaciones 
+        avl.insercion(r); // el avl es para busqueda por que al estar balanceado siempre es log(n)
+        heap.insert(r); // Contiene solo tareas PENDIENTES
         return "OK: registro " + id;
     }
 
@@ -71,9 +89,11 @@ public class Sistema {
      */
     private String consultar(int id) {
         Registro r = avl.buscar(id);
-        if (r == null) return "ERROR: el id " + id + " no existe";
-        return "ID=" + r.id + " NOMBRE=" + r.nombre + " PRIORIDAD=" + r.prioridad
-                + "\nPADRE=" + r.padre + " ESTADO=" + r.estadoActual();
+        if (r == null) {
+            return "ERROR: el id " + id + " no existe";
+        }
+
+        return "ID=" + r.id + " NOMBRE=" + r.nombre + " PRIORIDAD=" + r.prioridad + "\nPADRE=" + r.padre + " ESTADO=" + r.estadoActual();
     }
 
     /**
@@ -82,7 +102,10 @@ public class Sistema {
      * prioridad; en empate, menor id) y se le cambia el estado con atendido().
      */
     private String siguiente() {
-        if (heap.isEmpty()) return "SIN PENDIENTES";
+        if (heap.isEmpty()) {
+            return "SIN PENDIENTES";
+        }
+
         Registro r = heap.extractMax();
         r.atendido();
         return "ATENDIDO: " + r.id + " (" + r.nombre + ")";
@@ -95,9 +118,12 @@ public class Sistema {
      * pendientes, para que ningún cancelado pueda salir con SIGUIENTE. Los atendidos conservan su estado.
      */
     private String cancelar(int id) {
-        if (!avl.search(id)) return "ERROR: el id " + id + " no existe";
+        if (!avl.search(id)) {
+            return "ERROR: el id " + id + " no existe";
+        }
+
         int cancelados = arbol.cancelarSubarbol(id);
-        heap.reconstruccion();
+        heap.reconstruccion(); 
         return "CANCELADOS: " + cancelados;
     }
 
@@ -109,7 +135,10 @@ public class Sistema {
      */
     private String reporte() {
         Registro[] o = heap.ordenados();
-        if (o.length == 0) return "REPORTE vacio: 0 pendientes";
+        if (o.length == 0) {
+            return "REPORTE vacio: 0 pendientes";
+        }
+
         StringBuilder sb = new StringBuilder();
         for (int i = o.length - 1; i >= 0; i--) {
             sb.append(o[i].corto());

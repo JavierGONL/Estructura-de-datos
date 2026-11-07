@@ -1,9 +1,9 @@
 /**
  * Max-heap binario de Registros, guardado en un arreglo (monton[0..size-1]).
- * La raíz monton[0] es siempre la tarea que se atiende primero según Registro.antes
+ * La raíz monton[0] es siempre la tarea que se atiende primero según Registro.desempate
  * (mayor prioridad; si empatan, menor id). Contiene solo tareas PENDIENTES.
  * Posiciones: padre de i = (i-1)/2; hijo izquierdo = 2i+1; hijo derecho = 2i+2.
- * Toda comparación de orden se hace con Registro.antes: no hay reglas de desempate repetidas aquí.
+ * Toda comparación de orden se hace con Registro.desempate: no hay reglas de desempate repetidas aquí.
  */
 public class Max_heap_R {
     private Registro[] monton = new Registro[8];   // arreglo interno (puede tener espacio libre al final)
@@ -66,7 +66,7 @@ public class Max_heap_R {
 
     /**
      * Qué hace: hace subir el elemento de la posición i hasta que su padre vaya antes que él.
-     * Cómo: mientras i no sea la raíz y el elemento vaya ANTES que su padre (Registro.antes),
+     * Cómo: mientras i no sea la raíz y el elemento vaya ANTES que su padre (Registro.desempate),
      * los intercambia y continúa desde la posición del padre. Como mucho sube la altura del heap: O(log n).
      */
     static void siftup(Registro[] a, int i) {
@@ -155,7 +155,7 @@ public class Max_heap_R {
     }
 
     /**
-     * Qué hace: Heap-Sort. Devuelve una COPIA de a[0..n-1] ordenada de menor a mayor según Registro.antes
+     * Qué hace: Heap-Sort. Devuelve una COPIA de a[0..n-1] ordenada de menor a mayor según Registro.desempate
      * (o sea, el que se atiende primero queda al final). El arreglo original no se modifica.
      * Cómo: copia el arreglo (Heap-Sort desarma lo que ordena, por eso no se puede usar el heap
      * original); construye un heap con buildheap; y repite: intercambia la raíz con la última

@@ -6,11 +6,12 @@
  */
 public class ArbolGeneral {
 
-    /** Nodo del árbol general, tiene una variable registro y la lista de los hijos */
+    /** Nodo del árbol general: un registro y la lista de TODOS sus hijos (distinto del Nodo binario del BST/AVL, que tiene L y R). */
     private static class NodoGeneral {
         Registro registro;
         DynamicArray<NodoGeneral> hijos = new DynamicArray<>(2);
 
+        /** Qué hace: crea un nodo sin hijos. Cómo: guarda el registro; la lista de hijos arranca vacía. */
         NodoGeneral(Registro registro) {
             this.registro = registro;
         }
@@ -19,10 +20,12 @@ public class ArbolGeneral {
     private NodoGeneral root;
     private int contador;          // cantidad de nodos
 
+    /** Qué hace: crea un árbol vacío. Cómo: deja root en null. */
     public ArbolGeneral() {
         this.root = null;
     }
 
+    /** Qué hace: devuelve cuántos nodos hay. Cómo: devuelve el contador que insercion va sumando. */
     public int size() {
         return contador;
     }
@@ -52,10 +55,7 @@ public class ArbolGeneral {
         if (v == null) return null;
         if (v.registro.id == id) return v;
 
-        
-        /** va entrando en cada subarbol hasta que llega a un valor nulo o el que se busca,
-         *  si es el valor buscado sale del bucle for
-         */
+        // entra en cada subárbol hasta encontrar el id o llegar a null; si un hijo lo encuentra, se devuelve de inmediato
         for (NodoGeneral h : v.hijos) {
             NodoGeneral r = buscar(h, id);
             if (r != null) return r;

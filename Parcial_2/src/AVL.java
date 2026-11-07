@@ -11,18 +11,22 @@ public class AVL {
     /** Bitácora de las rotaciones hechas (para el caso D y para explicar qué pasó). */
     private DynamicArray<String> rotaciones = new DynamicArray<>(4);
 
+    /** Qué hace: devuelve cuántos registros hay. Cómo: devuelve el contador. */
     public int size() {
         return contador;
     }
 
+    /** Qué hace: devuelve la lista de rotaciones hechas hasta ahora. Cómo: devuelve la bitácora. */
     public DynamicArray<String> rotaciones() {
         return rotaciones;
     }
 
+    /** Qué hace: borra la bitácora de rotaciones. Cómo: vacía la lista. */
     public void limpiarRotaciones() {
         rotaciones.reset();
     }
 
+    /** Qué hace: id de la raíz, o 0 si el árbol está vacío. Cómo: lee root. */
     public int idRaiz() {
         return root == null ? 0 : root.registro.id;
     }
@@ -79,7 +83,7 @@ public class AVL {
      * Qué hace: deja v con balance entre -1 y 1 y devuelve la nueva raíz de ese subárbol.
      * Cómo: recalcula la altura de v y mira su balance:
      *  - balance > 1 (pesa a la izquierda): si el hijo izquierdo no pesa a la derecha (balance >= 0)
-     *    es LL; una rotación a la derecha en v. Si el hijo izquierdo pesa a la derecha es LR:
+     *    es LL: una rotación a la derecha en v. Si el hijo izquierdo pesa a la derecha es LR:
      *    primero rotación a la izquierda en el hijo y luego a la derecha en v.
      *  - balance < -1 (pesa a la derecha): si el hijo derecho no pesa a la izquierda (balance <= 0)
      *    es RR: una rotación a la izquierda en v. Si pesa a la izquierda es RL: derecha en el hijo

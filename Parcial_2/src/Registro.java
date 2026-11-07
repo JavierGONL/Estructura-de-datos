@@ -6,7 +6,8 @@
  *
  * Estados: PENDIENTE (aún no se entrega al robot), ATENDIDO (ya se entregó) y CANCELADO.
  * El estado es privado: solo se consulta con estadoActual() y solo se cambia con
- * pendiente(), atendido() y cancelado(). 
+ * pendiente(), atendido() y cancelado(). Así no hay letras sueltas ("P", "A", "C")
+ * que se puedan escribir mal sin que el programa avise.
  */
 public class Registro {
 
@@ -30,24 +31,29 @@ public class Registro {
         this.padre = padre;
     }
 
+    /** Qué hace: dice en qué estado está la tarea. Cómo: devuelve el campo privado estado. */
     public Estado estadoActual() {
         return this.estado;
     }
 
+    /** Qué hace: deja la tarea en PENDIENTE. Cómo: asigna el estado. (El sistema no la usa: solo sirve para pruebas.) */
     public void pendiente() {
         this.estado = Estado.PENDIENTE;
     }
 
+    /** Qué hace: marca la tarea como CANCELADA. Cómo: asigna el estado; el objeto no se borra de ninguna estructura. */
     public void cancelado() {
         this.estado = Estado.CANCELADO;
     }
 
+    /** Qué hace: marca la tarea como ATENDIDA (ya se entregó al robot). Cómo: asigna el estado. */
     public void atendido() {
         this.estado = Estado.ATENDIDO;
     }
 
     /**
-     * Qué hace: decide cuál de dos tareas se atiende primero. Es el ÚNICO lugar donde está esta regla.
+     * Qué hace: decide cuál de dos tareas se atiende primero (por prioridad y, si empatan, por id). Es el ÚNICO lugar donde está esta regla;
+     * se llama desempate porque el id decide los empates, pero es el orden completo.
      * Cómo: si las prioridades son distintas gana la mayor; si empatan, gana la de menor id.
      * Lo usan el heap (para subir y bajar) y Heap-Sort (para ordenar), así nunca se contradicen.
      * Devuelve true si a va antes que b.
