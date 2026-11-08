@@ -9,10 +9,10 @@
  */
 public class Sistema {
     // aca se declaran las 4 estructuras, 
-    private final ArbolGeneral arbol = new ArbolGeneral();
-    private final BST bst = new BST();
-    private final AVL avl = new AVL();
-    private final Max_heap_R heap = new Max_heap_R();
+    private final ArbolGeneral arbol = new ArbolGeneral(); // Representa la jerarquía de tareas: una tarea y sus subtareas
+    private final BST bst = new BST(); // el bst como que solo esta para comparaciones 
+    private final AVL avl = new AVL(); // el avl es para busqueda por que al estar balanceado siempre es log(n)
+    private final Max_heap_R heap = new Max_heap_R(); // Contiene solo tareas PENDIENTES
 
     /**
      * Qué hace: ejecuta una línea de comando y devuelve el texto de respuesta.
@@ -75,10 +75,10 @@ public class Sistema {
 
         // ahora el registro tiene que entrar en las 4 estructuras 
         Registro r = new Registro(id, nombre, prioridad, padre);
-        arbol.insercion(r); // Representa la jerarquía de tareas: una tarea y sus subtareas
-        bst.insercion(r); // el bst como que solo esta para comparaciones 
-        avl.insercion(r); // el avl es para busqueda por que al estar balanceado siempre es log(n)
-        heap.insert(r); // Contiene solo tareas PENDIENTES
+        arbol.insercion(r); 
+        bst.insercion(r); 
+        avl.insercion(r); 
+        heap.insert(r); 
         return "OK: registro " + id;
     }
 
