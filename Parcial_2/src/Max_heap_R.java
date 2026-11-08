@@ -36,18 +36,6 @@ public class Max_heap_R {
         if (size == 0) throw new RuntimeException("no hay registros disponibles");
         return monton[0];
     }
-
-    /**
-     * Qué hace: busca un registro por id y devuelve su posición en el arreglo (o -1 si no está).
-     * Cómo: recorre el arreglo comparando ids. (La prioridad no sirve para buscar: se repite entre registros.) O(n).
-     */
-    public int busqueda(int id) {
-        for (int i = 0; i < size; i++) {
-            if (monton[i].id == id) return i;
-        }
-        return -1;
-    }
-
     /**
      * Qué hace: agrega un registro al heap.
      * Cómo: si el arreglo está lleno lo duplica (copiando a mano); pone el registro en la primera
