@@ -215,3 +215,5 @@ CONCLUSION: Coincide con lo esperado (16 comprobaciones [OK]). Reproduce la sesi
 CONCLUSION: Coincide con lo esperado (5 comprobaciones [OK]). 4000 operaciones aleatorias en BST y AVL contra un oraculo simple (arreglo de booleanos), verificando el balance del AVL tras cada operacion; y Heap-Sort de 500 registros contra extraer todo el heap.
 
 RESUMEN FINAL: RESUMEN: 71/71 comprobaciones correctas
+
+NOTA: porfavor pon aqui las pruebas kevin, capaz juego bloodborne una hora y me trasnocho de todas formas XD
