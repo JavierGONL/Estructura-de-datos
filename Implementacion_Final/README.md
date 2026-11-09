@@ -62,6 +62,36 @@ Reglas de diseño que se cumplen:
 * El informe se genera con el botón *Finalizar ejecución y generar informe de rendimiento*
   (*Rendimiento ▸ Consultar rendimiento…*). El coste del propio PDF queda en la ejecución siguiente.
 
+## Clasificación de latidos (Random Forest propio en Java) — `ecg.ml`
+
+Random Forest implementado en Java **sin librerías de machine learning**. Clasifica cada latido en una
+de las 4 clases AAMI (N, S, V, F) usando estructuras de datos propias. Es una versión pensada para
+**leerse y defenderse**: árboles de decisión con entropía + corte por la media y azar con
+`java.util.Random` sembrado (misma semilla → mismo bosque).
+
+Estructuras propias (`ecg.ml.estructuras`): `DynamicArray`, `CircularQueue` + `MovingMean`,
+`MinHeap` + `topK`, `TreeNode` y sus utilidades.
+
+Núcleo ML (`ecg.ml`): `ArbolDesicion` (árbol de decisión), `BosqueSimple` (Random Forest),
+`Entropia` y `Muestreo` (entropía y las dos fuentes de azar), `Metricas` (matriz de confusión,
+accuracy, F1 macro), `Datos` (lee los registros con el lector WFDB de la app y arma DS1/DS2) y
+`Caracteristicas` (produce el vector de 257 valores por latido: 252 de forma + 5 de ritmo RR).
+
+Programa de ejemplo (desde la raíz del proyecto, con las clases en `target/classes`):
+```bash
+# compilar el paquete ml (y sus estructuras)
+javac --release 25 -cp target/classes -d target/classes $(find src/main/java/ecg/ml -name '*.java')
+
+# entrenar con DS1, evaluar con DS2 e imprimir las métricas
+java -Xmx2g -cp target/classes ecg.ml.EjemploSimple --arboles 25 --min-hoja 20
+```
+`EjemploSimple` acepta `--arboles N`, `--min-hoja L`, `--semilla S` y `--dataset dir`. Si existen
+`ml/dataset/ds1.txt` y `ds2.txt` se usan directamente; si no, se construyen leyendo los registros
+MIT-BIH de `data/`. Las clases raras S y F son difíciles (hay muy pocos latidos); N y V se predicen bien.
+
+Pruebas: `ecg.ml.ModeloMLTest` (características, entropía, muestreo, árbol, bosque y métricas) y
+`ecg.ml.EstructurasTest` (las estructuras propias contra las colecciones estándar).
+
 ## Notas de verificación
 * 31 pruebas JUnit (lectura 16/212/8/24, cabeceras, conversión, anotaciones, detección, fusión, geometría,
   zoom, exportación, medidores y PDF) pasan con JDK 25.
