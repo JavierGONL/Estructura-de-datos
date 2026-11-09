@@ -85,6 +85,7 @@ public class BST {
         } else {
             if (v.L == null) return v.R;
             if (v.R == null) return v.L;
+            
             Nodo suc = minimo(v.R);
             v.registro = suc.registro;
             v.R = eliminar(v.R, suc.registro.id);

@@ -1,0 +1,217 @@
+PRUEBAS - Examen 02 Estructuras de Datos (contexto II.1 Planificador de robot)
+Salidas obtenidas ejecutando el programa tal como entrega el ZIP:
+  javac -d out src/*.java
+  java -cp out Main < casos/casoX.txt        (casos A, B y C)
+  java -cp out PruebasEstructuras            (casos D, E y F y pruebas adicionales)
+Cada comprobacion [OK] compara el resultado obtenido con el esperado del enunciado.
+
+=== CASO A: Integracion completa ===
+ENTRADA (casos/casoA.txt):
+REGISTRAR 10 A 2 0
+REGISTRAR 20 B 5 10
+REGISTRAR 30 C 3 10
+CONSULTAR 20
+SIGUIENTE
+CANCELAR 10
+REPORTE
+ESTADISTICAS
+
+SALIDA OBTENIDA:
+OK: registro 10
+OK: registro 20
+OK: registro 30
+ID=20 NOMBRE=B PRIORIDAD=5
+PADRE=10 ESTADO=PENDIENTE
+ATENDIDO: 20 (B)
+CANCELADOS: 2
+REPORTE vacio: 0 pendientes
+Preorden: 10,20,30
+Postorden: 20,30,10
+Por niveles: 10,20,30
+Altura arbol general: 1
+Hojas: 2
+Altura BST: 2
+Altura AVL: 1
+Pendientes: 0
+
+CONCLUSION: Coincide con lo esperado. CONSULTAR 20 muestra B (ID 20, prioridad 5, PENDIENTE); SIGUIENTE atiende B (20); CANCELAR 10 cancela 2 (A=10 y C=30) porque B ya estaba ATENDIDO y conserva su estado; REPORTE queda vacio; pendientes = 0. El arbol general conserva los 3 nodos: preorden 10,20,30; postorden 20,30,10; por niveles 10,20,30; altura 1; 2 hojas.
+
+=== CASO B: Empates de prioridad ===
+ENTRADA (casos/casoB.txt):
+REGISTRAR 50 A 7 0
+REGISTRAR 30 B 7 50
+REGISTRAR 40 C 9 50
+REPORTE
+SIGUIENTE
+SIGUIENTE
+
+SALIDA OBTENIDA:
+OK: registro 50
+OK: registro 30
+OK: registro 40
+40(9) 30(7) 50(7)
+ATENDIDO: 40 (C)
+ATENDIDO: 30 (B)
+
+CONCLUSION: Coincide con lo esperado. Reporte 40,30,50 (40 tiene prioridad 9; 30 y 50 empatan en 7 y gana el menor ID, 30). Primer atendido = 40; segundo atendido = 30.
+
+=== CASO C: Errores de registro ===
+ENTRADA (casos/casoC.txt):
+REGISTRAR 10 A 2 0
+REGISTRAR 10 B 3 10
+REGISTRAR 40 C 5 99
+
+SALIDA OBTENIDA:
+OK: registro 10
+ERROR: ID duplicado (10)
+ERROR: el padre 99 no existe
+
+VERIFICACION ADICIONAL (mismos comandos + ESTADISTICAS y CONSULTAR 40):
+> REGISTRAR 10 A 2 0
+OK: registro 10
+> REGISTRAR 10 B 3 10
+ERROR: ID duplicado (10)
+> REGISTRAR 40 C 5 99
+ERROR: el padre 99 no existe
+> ESTADISTICAS
+Preorden: 10
+Postorden: 10
+Por niveles: 10
+Altura arbol general: 0
+Hojas: 1
+Altura BST: 0
+Altura AVL: 0
+Pendientes: 1
+> CONSULTAR 40
+ERROR: el id 40 no existe
+
+CONCLUSION: Coincide con lo esperado. Se acepta el primer registro; el segundo se rechaza por ID duplicado y el tercero porque no existe el padre 99. Queda un solo registro (ver verificacion adicional: Pendientes 1, un solo nodo en el arbol general, BST y AVL; CONSULTAR 40 no lo encuentra).
+
+=== CASO D: Rotaciones AVL ===
+Caso D-LL: inserciones [30, 20, 10]
+  rotaciones realizadas: [LL (derecha en 30)]
+  [OK] raiz final: 20
+  [OK] inorden: [10, 20, 30]
+  [OK] altura: 1
+  [OK] balanceado (todos los factores en [-1,1]): true
+  [OK] tipo de rotacion: LL
+Caso D-RR: inserciones [10, 20, 30]
+  rotaciones realizadas: [RR (izquierda en 10)]
+  [OK] raiz final: 20
+  [OK] inorden: [10, 20, 30]
+  [OK] altura: 1
+  [OK] balanceado (todos los factores en [-1,1]): true
+  [OK] tipo de rotacion: RR
+Caso D-LR: inserciones [30, 10, 20]
+  rotaciones realizadas: [LR (izquierda en 10, derecha en 30)]
+  [OK] raiz final: 20
+  [OK] inorden: [10, 20, 30]
+  [OK] altura: 1
+  [OK] balanceado (todos los factores en [-1,1]): true
+  [OK] tipo de rotacion: LR
+Caso D-RL: inserciones [10, 30, 20]
+  rotaciones realizadas: [RL (derecha en 30, izquierda en 10)]
+  [OK] raiz final: 20
+  [OK] inorden: [10, 20, 30]
+  [OK] altura: 1
+  [OK] balanceado (todos los factores en [-1,1]): true
+  [OK] tipo de rotacion: RL
+
+CONCLUSION: Coincide con lo esperado (20 comprobaciones [OK]). En los cuatro casos la raiz final es 20, el inorden 10,20,30, la altura 1 y el arbol queda balanceado. LL: una rotacion simple a la derecha en 30. RR: una rotacion simple a la izquierda en 10. LR: primero izquierda en 10 y luego derecha en 30 (doble). RL: primero derecha en 30 y luego izquierda en 10 (doble).
+
+=== CASO E: BST frente a AVL ===
+  BST: 1(_,2(_,3(_,4(_,5(_,6(_,7))))))
+  AVL: 4(2(1,3),6(5,7))
+  [OK] altura BST con 1..7: 6
+  [OK] altura AVL con 1..7: 2
+  [OK] inorden BST: [1, 2, 3, 4, 5, 6, 7]
+  [OK] inorden AVL: [1, 2, 3, 4, 5, 6, 7]
+  Tras eliminar 4 -> BST: 1(_,2(_,3(_,5(_,6(_,7))))) | AVL: 5(2(1,3),6(_,7))
+  [OK] buscar(4) en BST: null
+  [OK] buscar(4) en AVL: null
+  [OK] inorden BST sin 4: [1, 2, 3, 5, 6, 7]
+  [OK] inorden AVL sin 4: [1, 2, 3, 5, 6, 7]
+  [OK] AVL balanceado tras eliminar: true
+  (opcional) 1..1000
+  [OK] altura BST con 1..1000: 999
+  [OK] altura AVL con 1..1000: 9
+  [OK] AVL 1..1000 balanceado: true
+
+CONCLUSION: Coincide con lo esperado (12 comprobaciones [OK]). Con 1..7 el BST degenera en una cadena (altura 6) y el AVL queda perfecto (altura 2); ambos tienen el mismo inorden. Tras eliminar 4 ya no se encuentra ni aparece en el inorden y el AVL sigue balanceado.
+
+=== CASO F: Heap y Heap-Sort ===
+  heap (id(prioridad)) tras buildHeap: [2(10), 4(5), 7(9), 1(4), 5(1), 6(8), 3(3), 8(2)]
+  [OK] prioridad de la raiz: 10
+  [OK] prioridad extraida: 10
+  [OK] nueva raiz tras extraer: 9
+  [OK] Heap-Sort ascendente: [1, 2, 3, 4, 5, 8, 9, 10]
+  [OK] la entrada no se modifica: [4, 10, 3, 5, 1, 8, 9, 2]
+
+CONCLUSION: Coincide con lo esperado (5 comprobaciones [OK]). El arreglo interno del heap es una de varias representaciones validas (raiz 10; tras extraer, raiz 9). Heap-Sort ascendente produce 1,2,3,4,5,8,9,10 y no modifica la lista de entrada.
+
+PRUEBAS ADICIONALES (no exigidas por el enunciado)
+
+=== PRUEBAS ADICIONALES: preguntas de sustentacion del Anexo B ===
+P1 AVL 50,20,40: [LR (izquierda en 20, derecha en 50)]
+  [OK] P1 forma: 40(20,50)
+  [OK] P1 rotacion: LR (izquierda en 20, derecha en 50)
+  [OK] P2 extraer: 10
+  [OK] P2 heap resultante: [9, 5, 8, 4, 1, 2, 3]
+  [OK] P3 tras insertar 7: [9, 7, 8, 5, 1, 2, 3, 4]
+  [OK] P8 BST eliminar 5 (sucesor): 8(3(1,4),9)
+  [OK] P4 reporte: 30(9) 40(9) 50(7)
+  [OK] P4 primer SIGUIENTE: ATENDIDO: 30 (B)
+  [OK] P6 CANCELAR 20: CANCELADOS: 0
+  [OK] P6 reporte: 30(3) 10(2)
+  [OK] P5 CANCELAR 10: CANCELADOS: 2
+  [OK] P5 CONSULTAR 20: ID=20 NOMBRE=B PRIORIDAD=5
+PADRE=10 ESTADO=ATENDIDO
+  [OK] P7 estadisticas: Preorden: 10,20,40,30
+Postorden: 40,20,30,10
+Por niveles: 10,20,30,40
+Altura arbol general: 2
+Hojas: 2
+Altura BST: 3
+Altura AVL: 2
+Pendientes: 4
+
+CONCLUSION: Coincide con lo esperado (13 comprobaciones [OK]). Reproduce las respuestas esperadas de las preguntas de sustentacion 1-8 del Anexo B.
+
+=== PRUEBAS ADICIONALES: sesion del ejemplo del Anexo A ===
+  [OK] duplicado: ERROR: ID duplicado (20)
+  [OK] segunda raiz: ERROR: ya existe una raiz (10)
+  [OK] padre inexistente: ERROR: el padre 77 no existe
+  [OK] prioridad invalida: ERROR: prioridad invalida (15)
+  [OK] reporte inicial: 40(9) 20(8) 60(8) 50(6) 30(5) 70(4) 10(3) 80(2)
+  [OK] SIGUIENTE: ATENDIDO: 40 (Pastillas)
+  [OK] CANCELAR 30: CANCELADOS: 3
+  [OK] reporte: 20(8) 50(6) 10(3) 80(2)
+  [OK] SIGUIENTE: ATENDIDO: 20 (Frenos)
+  [OK] CANCELAR 20: CANCELADOS: 1
+  [OK] CONSULTAR 60 cancelado: ID=60 NOMBRE=Cadena PRIORIDAD=8
+PADRE=30 ESTADO=CANCELADO
+  [OK] ESTADISTICAS: Preorden: 10,20,40,50,30,60,70,80
+Postorden: 40,50,20,60,70,30,80,10
+Por niveles: 10,20,30,80,40,50,60,70
+Altura arbol general: 2
+Hojas: 5
+Altura BST: 7
+Altura AVL: 3
+Pendientes: 2
+  [OK] CONSULTAR id inexistente: ERROR: el id 77 no existe
+  [OK] CANCELAR id inexistente: ERROR: el id 77 no existe
+  [OK] A.4 heap tras 8 inserciones: [40(9), 20(8), 60(8), 10(3), 50(6), 30(5), 70(4), 80(2)]
+  [OK] A.4 heap tras extraerMaximo: [20(8), 50(6), 60(8), 10(3), 80(2), 30(5), 70(4)]
+
+CONCLUSION: Coincide con lo esperado (16 comprobaciones [OK]). Reproduce la sesion del ejemplo del Anexo A (casos/ejemplo_anexoA.txt) y las trazas del heap.
+
+=== PRUEBAS ADICIONALES: aleatorias contra un oraculo simple ===
+  [OK] 4000 operaciones: resultados de insertar/eliminar y balance AVL en cada paso: true
+  [OK] inorden BST = oraculo: [1, 4, 6, 9, 10, 11, 12, 13, 14, 15, 16, 20, 21, 23, 26, 27, 28, 30, 31, 32, 34, 35, 36, 38, 39, 40, 42, 44, 45, 46, 48, 49, 50, 51, 52, 54, 55, 56, 57, 59, 60, 61, 66, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 83, 85, 86, 88, 91, 92, 93, 95, 96, 97, 98, 99, 100, 102, 104, 105, 106, 108, 109, 110, 112, 114, 115, 117, 121, 123, 124, 126, 129, 131, 132, 136, 137, 138, 139, 140, 141, 142, 144, 145, 146, 147, 148, 150, 152, 153, 154, 158, 159, 161, 162, 163, 164, 165, 172, 173, 174, 175, 176, 177, 179, 180, 182, 184, 186, 188, 189, 190, 192, 193, 195, 197, 198, 199, 200]
+  [OK] inorden AVL = oraculo: [1, 4, 6, 9, 10, 11, 12, 13, 14, 15, 16, 20, 21, 23, 26, 27, 28, 30, 31, 32, 34, 35, 36, 38, 39, 40, 42, 44, 45, 46, 48, 49, 50, 51, 52, 54, 55, 56, 57, 59, 60, 61, 66, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 83, 85, 86, 88, 91, 92, 93, 95, 96, 97, 98, 99, 100, 102, 104, 105, 106, 108, 109, 110, 112, 114, 115, 117, 121, 123, 124, 126, 129, 131, 132, 136, 137, 138, 139, 140, 141, 142, 144, 145, 146, 147, 148, 150, 152, 153, 154, 158, 159, 161, 162, 163, 164, 165, 172, 173, 174, 175, 176, 177, 179, 180, 182, 184, 186, 188, 189, 190, 192, 193, 195, 197, 198, 199, 200]
+  [OK] Heap-Sort de 500 registros esta ordenado (prioridad desc, id asc): true
+  [OK] Heap-Sort coincide con extraer todo el heap (mismos ids en el mismo orden): true
+
+CONCLUSION: Coincide con lo esperado (5 comprobaciones [OK]). 4000 operaciones aleatorias en BST y AVL contra un oraculo simple (arreglo de booleanos), verificando el balance del AVL tras cada operacion; y Heap-Sort de 500 registros contra extraer todo el heap.
+
+RESUMEN FINAL: RESUMEN: 71/71 comprobaciones correctas
