@@ -99,10 +99,10 @@ Arboles, BST, AVL, Max-Heap, Heap-sort, estructuras de datos
 % =========================================================
 \section{problema elegido y diagrama de estructuras}
 \subsection{enfoque elegido}
-Se decidio implementar el sistema de registros para representar las tareas pendientes en un robot, consideramos que es un enofoque interesante para nosotros como ingenieros mecatronicos debido a la gran importancia de las ordenes secuenciales en la robotica industrial sumado a como este un campo de estudio es una de las principales areas de desarrollo de nuestra carrera y permite visualizar la integracion de las diferentes disciplinas que desarrolla la ingenieria mecatronica.
+Se decidio implementar el sistema de registros para el contexto II.1, representar las tareas pendientes en un robot, consideramos que es un enofoque interesante para nosotros como ingenieros mecatronicos debido a la gran importancia de las ordenes secuenciales en la robotica industrial sumado a como este un campo de estudio es una de las principales areas de desarrollo de nuestra carrera y permite visualizar la integracion de las diferentes disciplinas que desarrolla la ingenieria mecatronica.
 
 \subsection{diagrama basico de las estructuras de datos}
-Para las implementaciones de las estructuras se decidio basar todas en una clase registro, a partir de esta dependiendo del caso se introducen directamente (heap) o por medio de un nodo.
+Para las implementaciones todas las estructuras usan la clase registro, esta dependiendo del caso se introducen directamente (heap) o por medio de un nodo.
 \\
 Hecho esto los ADTs implementados (heap, BST, AVL*, y arbol general) son usadas para la estructura del sistema de registros general el cual finalmente sera usado en el main.
 \begin{figure}[h!]
@@ -131,7 +131,7 @@ Heap-Sort & $\theta(n \log n)$ & $O(n \log n)$ \\
 \addlinespace
 Árbol general: buscar / cancelarSubarbol & $\theta(n)$ & $O(n)$ \\
 CANCELAR (completo) & $\theta(n)$ & $O(n)$ \\
-REPORTE & $\theta(k \log k)$ & $O(k \log k)$ \\
+REPORTE & $\theta(h \log h)$ & $O(h \log h)$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -150,7 +150,7 @@ Heap-sort despues de realizar un build heap (O(n)) realizar n veces un siftdown 
 \subsection{complejidad del arbol general}
 La busqueda busca en todos los nodos del arbol hasta encontrar el que encaje con la ID, se mantendra en magnitud lineal.
 \\
-Para la cancelacion del subarbol primero lo busca y entonces lo elimina, dando nuevamente una longitud lineal
+Para la cancelacion del subarbol primero lo busca y entonces cambia su estado a cancelado, y recursivamente cancela a los subarbol decendientes del nodo, dando nuevamente una longitud lineal
 \subsection{complejidad del sistema}
 El Reporte realizar un heap sort (nlogn) y un bucle for de n elementos para representar el reporte (n), la magnitud que marca el crecimiento es O(nlogn)
 \\
@@ -163,17 +163,23 @@ Al comparar las alturas, con las claves 1..7 el BST construido insertando en ord
 \section{errores encontrados y decisiones tomadas en la implementacion}
 \subsection{decisiones de implementacion relevantes}
 \begin{itemize}
- \item Se decidio separar completamente la implementacion de arbol general de la de BST y de igual modo la de AVL de la de BST, esto se realizo por la dificultad para el grupo de realizar herencia entre clases, a pesar de ser algo posible de aprender consideramos que la diferencia no es significativa para el momento en el que habiamos caido en cuenta de esto.
- \item Se decidio implementar el registro como una misma clase usada en todas las estructuras para unificar el diseño del algoritmo entre todas las estructuras.
- \item Dentro de heap no se implemento directamente un arreglo dinamico debido a que no era estrictamente necesario, pues en la propia implementacion tomada como ejemplo se podia mantener las convenciones de indices del arreglo normal con tan solo poner un caso para el duplicado en vez de usar una clase completa con metodos no tan favorables para el flujo de programacion
+    \item se uso un DynamicArray propio como estructura adicional en el arbol general, porque al no saber cuantos hijos va a tener cada nodo se necesitaba una estructura eficiente en busqueda y que cresca lo que se necesite.
+    \item Dentro de heap no se implemento directamente un arreglo dinamico debido a que no era estrictamente necesario, pues en la propia implementacion tomada como ejemplo se podia mantener las convenciones de indices del arreglo normal con tan solo poner un caso para el duplicado en vez de usar una clase completa con metodos no tan favorables para el flujo de programacion
+
 \end{itemize}
 \subsection{errores encontrados}
 \begin{itemize}
- \item Inicialmente el siftdown y siftup del heap debido a la implementacion ineficiente de las condiciones del desempate no funcionaban correctamente, para solucionar esto se creo una funcion especifica para matener el condicional que mantenia los bucles en el heap original
- \item Para el arbol general se hizo uso de una clase nodo general, pues inicialmente se pensaba trabajar con el mismo nodo usado en BST mas la complejidad de mantenerlo para ambos caso orillo a crear uno propio para cada uno.
- \item Debido a la falta de conocimiento en java sin querer se asignaron nuevos punteros en algunos puntos del heap en vez de crear nuevos objetos, esto se soluciono con los comandos adecuados.
+    \item Inicialmente el siftdown y siftup del heap debido a la implementacion ineficiente de las condiciones del desempate no funcionaban correctamente, para solucionar esto se creo una funcion especifica para matener el condicional que mantenia los bucles en el heap original
+    \item Para el arbol general se hizo uso de una clase nodo general, pues inicialmente se pensaba trabajar con el mismo nodo usado en BST mas la complejidad de mantenerlo para ambos caso orillo a crear uno propio para cada uno.
+    \item Debido a la falta de conocimiento en java sin querer se asignaron nuevos punteros en algunos puntos del heap en vez de crear nuevos objetos, esto se soluciono con los comandos adecuados.
+    
+    \item en el Heap en el metodo reconstruccion: copiaba la posición \texttt{i-1} y no actualizaba \texttt{size}.
+    \item en DynamicArray los metodos, add usaba \text{(capacity - 1)}, llevaba a una posicion en el array que no era, remove y removeIdx usaban \text{array[len--]} que hacia que lo guardado no fuera en la posicion logica adecuada por lo que se cambió a \text{array[--len]}; y set validaba \text{index > len} en vez de index >= len y  faltaba implementar get.
+    \item Registro: el estado se manejaba con letras sueltas (``P'', ``A'', ``C'') que podian llevar a errores al escribirlas. Se reemplazaron por el enum Estado y los métodos \text{pendiente()}, \text{atendido()} y \text{cancelado()}.
+    \item Queue: poll sacaba con \text{removeIdx(0)} que hacia que eliminar ese item fuera O(n) por extracción y el costo asintotico del levelOrder O(n$^2$), para arreglar esto se volvio una cola circular.
+
 \end{itemize}
-% =========================================================
+    % =========================================================
 % AGRADECIMIENTOS
 % =========================================================
 %ESTO ENTRA PARA POSTERIORES ENTREGAS
