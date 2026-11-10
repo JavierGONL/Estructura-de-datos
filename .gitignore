@@ -23,6 +23,10 @@ build/
 target/
 *.pdf
 
+# Datos y exportaciones locales
+data/
+exports/
+
 # Archivos comprimidos y paquetes
 *.zip
 *.tar
