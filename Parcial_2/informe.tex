@@ -86,13 +86,13 @@ Bogotá D.C., Colombia\\
 % RESUMEN
 % =========================================================
 
-\begin{abstract}
-Este documento presenta los resultados de las implementaciones realizadas de heap y avl para el manejor de registros en el marco de posibles instrucciones que realizara un robot industrial
-\end{abstract}
+%\begin{abstract}
+%Este documento presenta los resultados de las implementaciones realizadas de heap y avl para el manejor de registros en el marco de posibles instrucciones que realizara un robot industrial
+%\end{abstract}
 
-\begin{IEEEkeywords}
-Arboles, BST, AVL, Max-Heap, Heap-sort, estructuras de datos
-\end{IEEEkeywords}
+%\begin{IEEEkeywords}
+%Arboles, BST, AVL, Max-Heap, Heap-sort, estructuras de datos
+%\end{IEEEkeywords}
 
 % =========================================================
 % CONTENIDO
@@ -102,9 +102,13 @@ Arboles, BST, AVL, Max-Heap, Heap-sort, estructuras de datos
 Se decidio implementar el sistema de registros para el contexto II.1, representar las tareas pendientes en un robot, consideramos que es un enofoque interesante para nosotros como ingenieros mecatronicos debido a la gran importancia de las ordenes secuenciales en la robotica industrial sumado a como este un campo de estudio es una de las principales areas de desarrollo de nuestra carrera y permite visualizar la integracion de las diferentes disciplinas que desarrolla la ingenieria mecatronica.
 
 \subsection{diagrama basico de las estructuras de datos}
+<<<<<<< HEAD
 Para las implementaciones todas las estructuras usan la clase registro, esta dependiendo del caso se introducen directamente (heap) o por medio de un nodo.
+=======
+Para las implementaciones de las estructuras se decidio usar como unidad basica para almacenamiento a los registros, a partir de esta dependiendo del caso se introducen directamente a una estructura (heap) o por medio de un nodo (casos de arboles).
+>>>>>>> refs/remotes/origin/main
 \\
-Hecho esto los ADTs implementados (heap, BST, AVL*, y arbol general) son usadas para la estructura del sistema de registros general el cual finalmente sera usado en el main.
+Hecho esto las estructuras implementadas (heap, BST, AVL, y arbol general) son usadas para la estructura del sistema de registros general el cual finalmente sera usado en el main.
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{imagenes/diagrama_general.png}
