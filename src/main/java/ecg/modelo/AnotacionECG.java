@@ -6,6 +6,8 @@ public class AnotacionECG {
     public static final String FUENTE_REFERENCIA = "REFERENCIA";
     public static final String FUENTE_ALGORITMO = "ALGORITMO";
     public static final String FUENTE_MANUAL = "MANUAL";
+    /** Clasificación de latidos por el Random Forest (clase AAMI: N, S, V, F). */
+    public static final String FUENTE_CLASIFICACION = "CLASIFICACION";
 
     /** Símbolos WFDB que corresponden a latidos (N, L, R, a, V, F, J, A, S, E, j, /, Q, e, n, x, f, r). */
     private static final String SIMBOLOS_LATIDO = "NLRaVFJASEj/Qenxfr";

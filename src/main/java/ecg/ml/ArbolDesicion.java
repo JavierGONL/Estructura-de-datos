@@ -170,4 +170,65 @@ public class ArbolDesicion {
         }
         return true;
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // Serialización (volcado/lectura del árbol ya entrenado en formato texto).
+    //
+    // Recorrido en preorden, un nodo por línea:
+    //   hoja:          "L p0 p1 ... p(nClases-1)"      (distribución de la hoja)
+    //   nodo interno:  "N caracteristica umbral"       (seguido de su subárbol izquierdo y derecho)
+    // ---------------------------------------------------------------------------------------------
+
+    /** Reconstruye un árbol desde su volcado. Solo sirve para predecir (no se vuelve a entrenar). */
+    ArbolDesicion(int nClases, java.util.Iterator<String> lineas) {
+        this.nClases = nClases;
+        this.maxCaracteristicas = 0;
+        this.minMuestrasHoja = 0;
+        this.rng = null;
+        this.raiz = leerNodo(lineas);
+    }
+
+    /** Escribe el árbol entrenado (preorden) en {@code sb}, una línea por nodo. */
+    void escribir(StringBuilder sb) {
+        if (raiz == null) {
+            throw new IllegalStateException("el árbol no está entrenado");
+        }
+        escribirNodo(raiz, sb);
+    }
+
+    private static void escribirNodo(Nodo nodo, StringBuilder sb) {
+        if (nodo.distribucion != null) {
+            sb.append('L');
+            for (double p : nodo.distribucion) {
+                sb.append(' ').append(Double.toString(p));
+            }
+            sb.append('\n');
+            return;
+        }
+        sb.append('N').append(' ').append(nodo.caracteristica)
+                .append(' ').append(Double.toString(nodo.umbral)).append('\n');
+        escribirNodo(nodo.izquierda, sb);
+        escribirNodo(nodo.derecha, sb);
+    }
+
+    private Nodo leerNodo(java.util.Iterator<String> lineas) {
+        if (!lineas.hasNext()) {
+            throw new IllegalStateException("volcado del árbol incompleto");
+        }
+        String[] t = lineas.next().trim().split("\\s+");
+        Nodo nodo = new Nodo();
+        if ("L".equals(t[0])) {
+            double[] dist = new double[nClases];
+            for (int i = 0; i < nClases; i++) {
+                dist[i] = Double.parseDouble(t[i + 1]);
+            }
+            nodo.distribucion = dist;
+            return nodo;
+        }
+        nodo.caracteristica = Integer.parseInt(t[1]);
+        nodo.umbral = Double.parseDouble(t[2]);
+        nodo.izquierda = leerNodo(lineas);
+        nodo.derecha = leerNodo(lineas);
+        return nodo;
+    }
 }

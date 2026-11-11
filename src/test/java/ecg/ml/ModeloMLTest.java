@@ -10,8 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Pruebas del clasificador SIMPLE de {@code ecg.ml}: extracción de características, entropía, muestreo,
- * árbol, bosque y métricas. (Versión acorde a la implementación simple actual; la versión completa con
- * SplitMix64/Gini/árbol plano/serialización ya no forma parte del paquete.)
+ * árbol, bosque y métricas. Incluye la serialización del bosque entrenado (guardar/cargar).
  */
 class ModeloMLTest {
 
@@ -167,6 +166,29 @@ class ModeloMLTest {
         for (Muestra mu : datos) {
             assertEquals(a.predecir(mu.caracteristicas()), b.predecir(mu.caracteristicas()),
                     "misma semilla -> mismo bosque -> mismas predicciones");
+        }
+    }
+
+    @Test
+    void bosqueSerializacionConservaLasPredicciones(@org.junit.jupiter.api.io.TempDir java.nio.file.Path dir)
+            throws java.io.IOException {
+        generar();
+        BosqueSimple rf = new BosqueSimple(20, 4, 3, 5, 0);
+        rf.entrenar(datos);
+
+        java.nio.file.Path ruta = dir.resolve("bosque.rf");
+        rf.guardar(ruta);
+        assertTrue(java.nio.file.Files.size(ruta) > 0, "el archivo del modelo no está vacío");
+
+        BosqueSimple cargado = BosqueSimple.cargar(ruta);
+        assertEquals(rf.getNumeroArboles(), cargado.getNumeroArboles());
+        assertEquals(rf.getNumeroClases(), cargado.getNumeroClases());
+        for (Muestra mu : datos) {
+            assertEquals(rf.predecir(mu.caracteristicas()), cargado.predecir(mu.caracteristicas()),
+                    "el modelo cargado predice la misma clase");
+            assertArrayEquals(rf.predecirDistribucion(mu.caracteristicas()),
+                    cargado.predecirDistribucion(mu.caracteristicas()), 1e-12,
+                    "el modelo cargado da la misma distribución");
         }
     }
 

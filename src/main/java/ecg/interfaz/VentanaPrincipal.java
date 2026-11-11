@@ -24,6 +24,7 @@ public class VentanaPrincipal extends JFrame {
     private final JLabel resumen = new JLabel("", SwingConstants.CENTER);
     private final List<JMenuItem> requierenRegistro = new ArrayList<>();
     private VentanaRendimiento ventanaRendimiento;
+    private VentanaClasificacion ventanaClasificacion;
 
     public VentanaPrincipal(ControladorECG controlador) {
         super(ConstantesECG.NOMBRE_APLICACION);
@@ -57,6 +58,7 @@ public class VentanaPrincipal extends JFrame {
 
         JMenu analisis = new JMenu("Análisis");
         analisis.add(item("Analizar registro (detección QRS)", true, this::analizar));
+        analisis.add(item("Clasificar latidos (Random Forest)…", true, this::clasificar));
 
         JMenu rend = new JMenu("Rendimiento");
         rend.add(item("Consultar rendimiento / generar informe PDF…", false, this::mostrarRendimiento));
@@ -127,5 +129,13 @@ public class VentanaPrincipal extends JFrame {
         }
         ventanaRendimiento.actualizar();
         ventanaRendimiento.setVisible(true);
+    }
+
+    private void clasificar() {
+        if (ventanaClasificacion == null || !ventanaClasificacion.isDisplayable()) {
+            ventanaClasificacion = new VentanaClasificacion(this, controlador);
+        }
+        ventanaClasificacion.setVisible(true);
+        ventanaClasificacion.toFront();
     }
 }

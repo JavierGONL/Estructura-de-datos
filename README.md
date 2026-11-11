@@ -9,7 +9,7 @@ Java 25+ y Maven. Dependencias: Apache PDFBox 3.0.x (PDF) y JUnit 5 (pruebas).
 ## Uso rápido
 ```bash
 mvn package                                   # compila, prueba y crea el JAR ejecutable
-java -jar target/ProyectoECG-1.0.0-jar-with-dependencies.jar --demo   # registro sintético de 12 derivaciones
+java -jar target/Implementacion_Final-1.0.0-jar-with-dependencies.jar --demo   # registro sintético de 12 derivaciones
 java -jar ...jar data/PTBXL/00001/registro.hea                        # abrir un registro real
 ```
 Sin argumentos se abre la aplicación y se usa *Archivo ▸ Abrir registro ECG…*.

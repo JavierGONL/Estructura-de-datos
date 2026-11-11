@@ -16,6 +16,8 @@ public class GestorAnotaciones {
 
     public void mostrarDetecciones(boolean visible) { c.setMostrarDetecciones(visible); }
 
+    public void mostrarClasificacion(boolean visible) { c.setMostrarClasificacion(visible); }
+
     public void seleccionarAnotacion(AnotacionECG anotacion) { c.setAnotacionSeleccionada(anotacion); }
 
     /** Selecciona la anotación visible más cercana a {@code tiempo} dentro de la tolerancia (null si no hay). */
@@ -25,7 +27,10 @@ public class GestorAnotaciones {
         double mejorDist = toleranciaSegundos;
         for (AnotacionECG a : registro.getAnotaciones()) {
             boolean algoritmo = AnotacionECG.FUENTE_ALGORITMO.equals(a.getFuente());
-            if (algoritmo ? !c.isMostrarDetecciones() : !c.isMostrarAnotaciones()) continue;
+            boolean clasificacion = AnotacionECG.FUENTE_CLASIFICACION.equals(a.getFuente());
+            boolean visible = clasificacion ? c.isMostrarClasificacion()
+                    : algoritmo ? c.isMostrarDetecciones() : c.isMostrarAnotaciones();
+            if (!visible) continue;
             double d = Math.abs(a.getTiempo(fs) - tiempo);
             if (d <= mejorDist) { mejorDist = d; mejor = a; }
         }

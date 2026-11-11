@@ -6,6 +6,8 @@ import ecg.exportacion.ExportadorVistaActual;
 import ecg.exportacion.ImpresionEstandar;
 import ecg.exportacion.ImpresionPersonalizada;
 import ecg.lectura.CargadorRegistro;
+import ecg.ml.ServicioClasificacion;
+import ecg.modelo.AnotacionECG;
 import ecg.modelo.ConfiguracionVista;
 import ecg.modelo.RegistroECG;
 import ecg.modelo.ResultadoDeteccion;
@@ -35,6 +37,7 @@ public class ControladorECG {
     private final MonitorRendimiento monitor = new MonitorRendimiento(registroMetricas);
     private final CargadorRegistro cargador = new CargadorRegistro();
     private final AnalizadorECG analizador = new AnalizadorECG(new DetectorPanTompkins());
+    private final ServicioClasificacion clasificador = new ServicioClasificacion();
     private final ImpresionEstandar impresionEstandar = new ImpresionEstandar();
     private final ImpresionPersonalizada impresionPersonalizada = new ImpresionPersonalizada();
     private final ExportadorVistaActual exportadorVista = new ExportadorVistaActual();
@@ -95,6 +98,87 @@ public class ControladorECG {
         return r;
     }
 
+    // ---------------- clasificación de latidos (Random Forest) ----------------
+
+    public ServicioClasificacion getClasificador() { return clasificador; }
+    public boolean hayModeloRF() { return clasificador.hayModelo(); }
+
+    /** Carga un modelo RF guardado en disco si existe; devuelve true si se cargó. */
+    public boolean cargarModeloRF(ServicioClasificacion.Config cfg) throws IOException {
+        boolean cargado = clasificador.cargarModelo(cfg.modelo);
+        if (cargado) notificarCambio();
+        return cargado;
+    }
+
+    /**
+     * Garantiza que haya un modelo RF disponible: si no hay uno en memoria, intenta cargar el guardado
+     * en disco (con la configuración por defecto). Devuelve true si tras esto hay modelo.
+     */
+    public boolean asegurarModeloRF() throws IOException {
+        if (clasificador.hayModelo()) return true;
+        return cargarModeloRF(new ServicioClasificacion.Config());
+    }
+
+    /** Entrena el Random Forest con DS1 (operación pesada; llamar fuera del EDT). */
+    public String entrenarModeloRF(ServicioClasificacion.Config cfg,
+                                   java.util.function.DoubleConsumer progreso) throws IOException {
+        return medir("Entrenar Random Forest", () -> clasificador.entrenar(cfg, progreso));
+    }
+
+    /**
+     * Clasifica los latidos del registro abierto. Toma las posiciones de latido de, en orden de
+     * preferencia: anotaciones de referencia (.atr), detecciones del algoritmo o, si no hay ninguna,
+     * ejecuta la detección automática. Opcionalmente publica las clases como anotaciones para que el
+     * visor las dibuje sobre cada latido.
+     *
+     * @param dibujarEnVisor si es true, añade las clases como anotaciones (fuente MANUAL) al registro
+     */
+    public ServicioClasificacion.ResultadoClasificacion clasificarRegistroActual(boolean dibujarEnVisor)
+            throws IOException {
+        exigirRegistro();
+        if (!clasificador.hayModelo()) {
+            throw new IllegalStateException("Primero entrena el Random Forest (botón «Entrenar modelo»).");
+        }
+        ServicioClasificacion.ResultadoClasificacion resultado = medir("Clasificar latidos (RF)", () -> {
+            int[] posiciones = posicionesLatidos();
+            if (posiciones.length == 0) {
+                throw new IllegalStateException("No hay latidos que clasificar en el registro.");
+            }
+            return clasificador.clasificar(registro, posiciones);
+        });
+        if (dibujarEnVisor) {
+            List<AnotacionECG> marcas = new ArrayList<>(resultado.latidos.size());
+            for (ServicioClasificacion.LatidoClasificado l : resultado.latidos) {
+                marcas.add(new AnotacionECG(l.indiceMuestra, l.etiqueta(),
+                        "RF: " + l.etiqueta() + String.format(" (%.0f%%)", 100 * l.probabilidadMaxima()),
+                        AnotacionECG.FUENTE_CLASIFICACION));
+            }
+            registro.reemplazarAnotaciones(AnotacionECG.FUENTE_CLASIFICACION, marcas);
+            if (config != null) config.setMostrarClasificacion(true);
+            notificarCambio();
+        }
+        return resultado;
+    }
+
+    /** Posiciones de latido disponibles (referencia &gt; algoritmo &gt; detección nueva), ordenadas. */
+    private int[] posicionesLatidos() {
+        List<AnotacionECG> ref = registro.getAnotaciones(AnotacionECG.FUENTE_REFERENCIA);
+        List<Long> fuente = new ArrayList<>();
+        for (AnotacionECG a : ref) if (a.esLatido()) fuente.add(a.getIndiceMuestra());
+        if (fuente.isEmpty()) {
+            for (AnotacionECG a : registro.getAnotaciones(AnotacionECG.FUENTE_ALGORITMO)) {
+                fuente.add(a.getIndiceMuestra());
+            }
+        }
+        if (fuente.isEmpty()) {
+            fuente = analizador.analizarRegistro(registro).getIndicesDetectados();
+        }
+        java.util.Collections.sort(fuente);
+        int[] pos = new int[fuente.size()];
+        for (int i = 0; i < pos.length; i++) pos[i] = (int) (long) fuente.get(i);
+        return pos;
+    }
+
     // ---------------- acciones de visualización ----------------
 
     public void seleccionarCanal(int i, boolean visible) {
@@ -120,6 +204,7 @@ public class ControladorECG {
     }
     public void mostrarAnotaciones(boolean v) { gestores.anotaciones.mostrarAnotaciones(v); notificarCambio(); }
     public void mostrarDetecciones(boolean v) { gestores.anotaciones.mostrarDetecciones(v); notificarCambio(); }
+    public void mostrarClasificacion(boolean v) { gestores.anotaciones.mostrarClasificacion(v); notificarCambio(); }
     public void mostrarCuadricula(boolean v) { config.setMostrarCuadricula(v); notificarCambio(); }
     public void mostrarCursor(boolean v) { config.setMostrarCursor(v); notificarCambio(); }
     public void limpiarIntervalo() { gestores.intervalo.limpiarSeleccion(); notificarCambio(); }

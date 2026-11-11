@@ -63,7 +63,7 @@
                 </configuration>
             </plugin>
 
-            <!-- mvn package genera target/ProyectoECG-1.0.0-jar-with-dependencies.jar -->
+            <!-- mvn package genera target/Implementacion_Final-1.0.0-jar-with-dependencies.jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

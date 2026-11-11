@@ -27,11 +27,16 @@ public class AnalizadorECG {
     /** Detecta en todos los canales y fusiona por mayoría. */
     public ResultadoDeteccion analizarRegistro(RegistroECG registro) {
         double fs = registro.getFrecuenciaMuestreo();
-        List<ResultadoDeteccion> porCanal = new ArrayList<>();
-        for (int i = 0; i < registro.getNumeroCanales(); i++) {
-            porCanal.add(new ResultadoDeteccion(
-                    detector.detectar(registro.getCanal(i).getMuestras(), fs), fs, detector.getNombre(), i));
-        }
+        int nCanales = registro.getNumeroCanales();
+
+        // La detección de cada canal es independiente: se paraleliza para aprovechar los núcleos
+        // disponibles (clave con 12 derivaciones). El resultado por índice es determinista.
+        ResultadoDeteccion[] resultados = new ResultadoDeteccion[nCanales];
+        java.util.stream.IntStream.range(0, nCanales).parallel().forEach(i ->
+                resultados[i] = new ResultadoDeteccion(
+                        detector.detectar(registro.getCanal(i).getMuestras(), fs), fs, detector.getNombre(), i));
+        List<ResultadoDeteccion> porCanal = new ArrayList<>(nCanales);
+        for (ResultadoDeteccion r : resultados) porCanal.add(r);
         ultimosPorCanal = porCanal;
         int votos = FusionDetecciones.votosPorMayoria(registro.getNumeroCanales());
         List<Long> fusionados = fusion.fusionar(porCanal, VENTANA_FUSION_S, fs, votos);

@@ -29,6 +29,7 @@ public class ConfiguracionVista {
     private boolean mostrarCuadricula = true;
     private boolean mostrarAnotaciones = true;
     private boolean mostrarDetecciones = true;
+    private boolean mostrarClasificacion = true;
     private boolean mostrarCursor = true;
     private boolean mostrarNombres = true;
     private boolean mostrarEncabezado = false;
@@ -57,6 +58,7 @@ public class ConfiguracionVista {
         c.pixelesPorMm = pixelesPorMm; c.distribucion = distribucion;
         c.mostrarCuadricula = mostrarCuadricula; c.mostrarAnotaciones = mostrarAnotaciones;
         c.mostrarDetecciones = mostrarDetecciones; c.mostrarCursor = mostrarCursor;
+        c.mostrarClasificacion = mostrarClasificacion;
         c.mostrarNombres = mostrarNombres; c.mostrarEncabezado = mostrarEncabezado;
         c.cursorTiempo = cursorTiempo; c.cursorCanal = cursorCanal;
         c.intervaloSeleccionado = intervaloSeleccionado; c.anotacionSeleccionada = anotacionSeleccionada;
@@ -84,6 +86,8 @@ public class ConfiguracionVista {
     public void setMostrarAnotaciones(boolean v) { this.mostrarAnotaciones = v; }
     public boolean isMostrarDetecciones() { return mostrarDetecciones; }
     public void setMostrarDetecciones(boolean v) { this.mostrarDetecciones = v; }
+    public boolean isMostrarClasificacion() { return mostrarClasificacion; }
+    public void setMostrarClasificacion(boolean v) { this.mostrarClasificacion = v; }
     public boolean isMostrarCursor() { return mostrarCursor; }
     public void setMostrarCursor(boolean v) { this.mostrarCursor = v; }
     public boolean isMostrarNombres() { return mostrarNombres; }

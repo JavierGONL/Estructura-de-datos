@@ -1,0 +1,334 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=2.5cm}
+
+% Palabras clave del pseudocódigo en español.
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicensure{\textbf{Salida:}}
+\algrenewcommand\algorithmicreturn{\textbf{devolver}}
+\algrenewcommand\algorithmicif{\textbf{si}}
+\algrenewcommand\algorithmicthen{\textbf{entonces}}
+\algrenewcommand\algorithmicelse{\textbf{si no}}
+\algrenewcommand\algorithmicend{\textbf{fin}}
+\algrenewcommand\algorithmicfor{\textbf{para}}
+\algrenewcommand\algorithmicforall{\textbf{para cada}}
+\algrenewcommand\algorithmicdo{\textbf{hacer}}
+\algrenewcommand\algorithmicwhile{\textbf{mientras}}
+\algrenewcommand\algorithmicfunction{\textbf{función}}
+\algrenewcommand\algorithmicreturn{\textbf{devolver}}
+
+\title{Random Forest básico para la clasificación de latidos ECG\\
+\large Árbol de decisión, su entrenamiento y el bosque}
+\author{Proyecto ECG Viewer --- paquete \texttt{ecg.ml}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este documento describe el algoritmo básico del \emph{Random Forest} implementado a mano en
+el paquete \texttt{ecg.ml} (sin librerías de \emph{machine learning}). Se explica, con
+pseudocódigo, el árbol de decisión, su entrenamiento mediante entropía y corte por la media, y
+el bosque como promedio de muchos árboles. El clasificador asigna a cada latido una de las
+cuatro clases AAMI: \textbf{N} (normal), \textbf{S} (supraventricular), \textbf{V}
+(ventricular) y \textbf{F} (fusión).
+\end{abstract}
+
+\section{Idea general}
+
+Un \textbf{árbol de decisión} aprende una secuencia de preguntas del tipo
+``¿la característica $j$ es menor que un umbral $u$?'' que separan los latidos por su clase. Cada
+hoja del árbol guarda la proporción de clases de las muestras que cayeron en ella.
+
+Un solo árbol tiende a \emph{sobreajustar} (memoriza el conjunto de entrenamiento). El
+\textbf{Random Forest} (bosque aleatorio) combate esto entrenando muchos árboles distintos y
+promediando sus predicciones (voto \emph{blando}). Los árboles se diferencian por dos fuentes de
+azar:
+\begin{enumerate}
+  \item \textbf{Bootstrap}: cada árbol se entrena con una muestra de las filas tomada
+        \emph{con reemplazo} (algunas filas se repiten, otras no aparecen).
+  \item \textbf{Submuestreo de características}: en cada nodo solo se considera un subconjunto
+        aleatorio de las características (típicamente $\sqrt{d}$ de las $d$ totales).
+\end{enumerate}
+Como los árboles cometen errores poco correlacionados, al promediarlos esos errores se
+compensan y el bosque generaliza mejor que un árbol aislado.
+
+\section{Entropía y ganancia de información}
+
+La calidad de una partición se mide con la \textbf{entropía de Shannon}, que cuantifica el
+``desorden'' de clases de un grupo de muestras $S$:
+\[
+  H(S) \;=\; -\sum_{c=1}^{K} p_c \,\log_2 p_c ,
+  \qquad p_c = \frac{\#\{\text{muestras de clase } c\}}{|S|},
+\]
+donde $K$ es el número de clases ($K=4$ aquí) y los términos con $p_c = 0$ se omiten. Vale
+$H(S)=0$ cuando todas las muestras son de la misma clase (grupo \emph{puro}) y es máxima cuando
+están repartidas por igual.
+
+Al partir $S$ en dos grupos $S_{\text{izq}}$ y $S_{\text{der}}$ según una pregunta, la
+\textbf{ganancia de información} es la reducción de entropía:
+\[
+  \mathrm{GI}(S, j, u) \;=\; H(S)
+  \;-\; \frac{|S_{\text{izq}}|}{|S|}\,H(S_{\text{izq}})
+  \;-\; \frac{|S_{\text{der}}|}{|S|}\,H(S_{\text{der}}).
+\]
+La mejor pregunta de un nodo es la de mayor ganancia. En esta implementación el umbral $u$ de
+una característica $j$ no se busca exhaustivamente: se fija como la \textbf{media} de esa
+característica en las muestras del nodo (una elección simple y barata de calcular).
+
+\begin{algorithm}[h]
+\caption{Entropía de un grupo de muestras}
+\begin{algorithmic}[1]
+\Function{Entropia}{$S$, $K$}
+  \Require conjunto de muestras $S$; número de clases $K$
+  \Ensure entropía $H(S)$ en bits
+  \If{$S$ está vacío} \Return $0$ \EndIf
+  \State $\mathit{conteo}[1..K] \gets 0$
+  \ForAll{muestra $m \in S$}
+     \State $\mathit{conteo}[\,\text{clase}(m)\,] \mathrel{+}= 1$
+  \EndFor
+  \State $H \gets 0$;\quad $n \gets |S|$
+  \For{$c \gets 1$ \textbf{hasta} $K$}
+     \If{$\mathit{conteo}[c] > 0$}
+        \State $p \gets \mathit{conteo}[c] / n$
+        \State $H \gets H - p \cdot \log_2 p$
+     \EndIf
+  \EndFor
+  \State \Return $H$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{El árbol de decisión}
+
+Un nodo es \emph{interno} (una pregunta con dos hijos) o una \emph{hoja} (que guarda la
+distribución de clases). La construcción es recursiva: se detiene y crea una hoja cuando el
+grupo es pequeño (menos de $\ell$ muestras, el parámetro \texttt{min\_hoja}), cuando el grupo ya
+es puro, o cuando ningún corte logra separar las muestras.
+
+\subsection{Entrenamiento (construcción recursiva)}
+
+\begin{algorithm}[h]
+\caption{Construcción de un árbol de decisión}
+\begin{algorithmic}[1]
+\Function{Construir}{$S$}
+  \Require muestras $S$; parámetros globales: $K$ clases, $m$ características por nodo,
+           $\ell$ tamaño mínimo de hoja, generador aleatorio $\mathit{rng}$
+  \Ensure un nodo (raíz del subárbol)
+  \If{$|S| < \ell$ \textbf{o} \Call{MismaClase}{$S$}}
+     \State \Return hoja con distribución \Call{Distribucion}{$S$}
+  \EndIf
+  \State $d \gets$ número de características de una muestra
+  \State $C \gets$ \Call{MuestraSinReemplazo}{$d, m, \mathit{rng}$}
+        \Comment{$m$ características candidatas al azar}
+  \State $H_{\text{padre}} \gets$ \Call{Entropia}{$S, K$}
+  \State $(j^\ast, u^\ast, g^\ast) \gets (\text{indefinido}, 0, -\infty)$
+  \ForAll{característica $j \in C$}
+     \State $u \gets$ media de la característica $j$ en $S$
+     \State $g \gets$ \Call{GananciaInformacion}{$S, j, u, H_{\text{padre}}$}
+     \If{$g > g^\ast$}
+        \State $(j^\ast, u^\ast, g^\ast) \gets (j, u, g)$
+     \EndIf
+  \EndFor
+  \State $(S_{\text{izq}}, S_{\text{der}}) \gets$ \Call{Repartir}{$S, j^\ast, u^\ast$}
+  \If{$S_{\text{izq}}$ vacío \textbf{o} $S_{\text{der}}$ vacío}
+     \State \Return hoja con distribución \Call{Distribucion}{$S$}
+        \Comment{el corte no separa nada}
+  \EndIf
+  \State $\mathit{nodo}.\text{caracteristica} \gets j^\ast$;\quad
+         $\mathit{nodo}.\text{umbral} \gets u^\ast$
+  \State $\mathit{nodo}.\text{izquierda} \gets$ \Call{Construir}{$S_{\text{izq}}$}
+  \State $\mathit{nodo}.\text{derecha} \gets$ \Call{Construir}{$S_{\text{der}}$}
+  \State \Return $\mathit{nodo}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Reparto de muestras y ganancia de información}
+\begin{algorithmic}[1]
+\Function{Repartir}{$S, j, u$}
+  \State $S_{\text{izq}} \gets \emptyset$;\quad $S_{\text{der}} \gets \emptyset$
+  \ForAll{muestra $m \in S$}
+     \If{$m.\text{caracteristica}[j] < u$}
+        \State añadir $m$ a $S_{\text{izq}}$
+     \Else
+        \State añadir $m$ a $S_{\text{der}}$
+     \EndIf
+  \EndFor
+  \State \Return $(S_{\text{izq}}, S_{\text{der}})$
+\EndFunction
+\Statex
+\Function{GananciaInformacion}{$S, j, u, H_{\text{padre}}$}
+  \State $(S_{\text{izq}}, S_{\text{der}}) \gets$ \Call{Repartir}{$S, j, u$}
+  \State $n \gets |S|$
+  \State \Return $H_{\text{padre}}
+        - \dfrac{|S_{\text{izq}}|}{n}\,\Call{Entropia}{S_{\text{izq}}, K}
+        - \dfrac{|S_{\text{der}}|}{n}\,\Call{Entropia}{S_{\text{der}}, K}$
+\EndFunction
+\Statex
+\Function{Distribucion}{$S$}
+  \Comment{proporción de cada clase: lo que guarda una hoja}
+  \State $\mathit{dist}[1..K] \gets 0$
+  \ForAll{muestra $m \in S$}
+     \State $\mathit{dist}[\,\text{clase}(m)\,] \mathrel{+}= 1 / |S|$
+  \EndFor
+  \State \Return $\mathit{dist}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Predicción con un árbol}
+
+Para clasificar un vector de características $x$ se baja por el árbol desde la raíz: en cada
+nodo interno se va a la izquierda si $x[\,\text{caracteristica}\,] < \text{umbral}$ y a la
+derecha en caso contrario, hasta llegar a una hoja. Se devuelve la distribución de clases de
+esa hoja.
+
+\begin{algorithm}[h]
+\caption{Predicción de un árbol}
+\begin{algorithmic}[1]
+\Function{PredecirArbol}{$x$}
+  \Require vector de características $x$
+  \Ensure distribución de clases $\mathit{dist}[1..K]$
+  \State $\mathit{nodo} \gets \text{raíz}$
+  \While{$\mathit{nodo}$ no es hoja}
+     \If{$x[\,\mathit{nodo}.\text{caracteristica}\,] < \mathit{nodo}.\text{umbral}$}
+        \State $\mathit{nodo} \gets \mathit{nodo}.\text{izquierda}$
+     \Else
+        \State $\mathit{nodo} \gets \mathit{nodo}.\text{derecha}$
+     \EndIf
+  \EndWhile
+  \State \Return $\mathit{nodo}.\text{distribucion}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{El bosque (Random Forest)}
+
+El bosque guarda una lista de árboles. Para \textbf{entrenar}, por cada árbol se toma un
+bootstrap de las muestras y se construye un árbol con él (todos los árboles comparten el mismo
+generador aleatorio $\mathit{rng}$, de modo que con la misma semilla se obtiene el mismo
+bosque). Para \textbf{predecir}, se promedian las distribuciones de todos los árboles y se
+devuelve la clase de mayor probabilidad media (empate $\to$ la clase de menor índice).
+
+\begin{algorithm}[h]
+\caption{Entrenamiento del bosque}
+\begin{algorithmic}[1]
+\Function{EntrenarBosque}{$S$}
+  \Require muestras de entrenamiento $S$; parámetros: $T$ árboles, $K$ clases,
+           $m$ características por nodo, $\ell$ mínimo por hoja, semilla $s$
+  \Ensure bosque entrenado (lista de $T$ árboles)
+  \State $\mathit{rng} \gets$ generador aleatorio sembrado con $s$
+  \State $\text{arboles} \gets$ lista vacía
+  \For{$t \gets 1$ \textbf{hasta} $T$}
+     \State $I \gets$ \Call{Bootstrap}{$|S|, \mathit{rng}$}
+        \Comment{$|S|$ índices al azar con reemplazo}
+     \State $B \gets \{\, S[i] : i \in I \,\}$
+     \State $\text{arbol} \gets$ \Call{Construir}{$B$}
+        \Comment{usa $K, m, \ell, \mathit{rng}$}
+     \State añadir $\text{arbol}$ a $\text{arboles}$
+  \EndFor
+  \State \Return $\text{arboles}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{Predicción del bosque (voto blando)}
+\begin{algorithmic}[1]
+\Function{PredecirDistribucion}{$x$}
+  \State $\mathit{acum}[1..K] \gets 0$
+  \ForAll{$\text{arbol} \in \text{arboles}$}
+     \State $\mathit{dist} \gets$ \Call{PredecirArbol}{$\text{arbol}, x$}
+     \For{$c \gets 1$ \textbf{hasta} $K$}
+        \State $\mathit{acum}[c] \mathrel{+}= \mathit{dist}[c]$
+     \EndFor
+  \EndFor
+  \For{$c \gets 1$ \textbf{hasta} $K$}
+     \State $\mathit{acum}[c] \gets \mathit{acum}[c] / |\text{arboles}|$
+  \EndFor
+  \State \Return $\mathit{acum}$
+\EndFunction
+\Statex
+\Function{Predecir}{$x$}
+  \Ensure índice de clase predicha ($1 \ldots K$)
+  \State $\mathit{dist} \gets$ \Call{PredecirDistribucion}{$x$}
+  \State \Return $\arg\max_c \; \mathit{dist}[c]$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Las dos fuentes de azar}
+
+\begin{algorithm}[h]
+\caption{Muestreo aleatorio del bosque}
+\begin{algorithmic}[1]
+\Function{Bootstrap}{$n, \mathit{rng}$}
+  \Comment{$n$ índices en $[0,n)$ al azar \textbf{con} reemplazo}
+  \State $I[0..n-1]$
+  \For{$i \gets 0$ \textbf{hasta} $n-1$}
+     \State $I[i] \gets \mathit{rng}.\text{entero}(0, n)$
+  \EndFor
+  \State \Return $I$
+\EndFunction
+\Statex
+\Function{MuestraSinReemplazo}{$\mathit{total}, k, \mathit{rng}$}
+  \Comment{$k$ índices \textbf{distintos} de $[0,\mathit{total})$: Fisher--Yates parcial}
+  \State $k \gets \min(k, \mathit{total})$
+  \State $a[i] \gets i$ para $i \in [0, \mathit{total})$
+  \For{$i \gets 0$ \textbf{hasta} $k-1$}
+     \State $j \gets i + \mathit{rng}.\text{entero}(0, \mathit{total}-i)$
+     \State intercambiar $a[i] \leftrightarrow a[j]$
+  \EndFor
+  \State \Return $a[0 \ldots k-1]$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{Complejidad y parámetros}
+
+Sea $n = |S|$ el número de latidos de entrenamiento, $d$ el número de características
+(aquí $d = 257$: $252$ de forma de onda más $5$ de ritmo RR), $T$ el número de árboles y
+$m \approx \sqrt{d}$ las características consideradas por nodo.
+
+\begin{itemize}
+  \item \textbf{Construir un nodo} evalúa $m$ cortes y, por cada uno, reparte las muestras y
+        calcula dos entropías: coste $O(m \cdot n_{\text{nodo}})$ sobre las $n_{\text{nodo}}$
+        muestras del nodo.
+  \item \textbf{Un árbol} tiene profundidad $\approx \log(n/\ell)$; sumando los niveles, el
+        coste es del orden de $O(m \, n \log n)$.
+  \item \textbf{El bosque} multiplica por $T$: $O(T \, m \, n \log n)$.
+  \item \textbf{Predecir} un latido con el bosque es $O(T \cdot \text{profundidad})$.
+\end{itemize}
+
+Valores típicos usados en la aplicación: $T$ entre $15$ y $50$ árboles,
+$m = \lfloor \sqrt{257} \rfloor = 16$ características por nodo, $\ell$ (mínimo por hoja) entre
+$10$ y $20$. Con las $\sim\!51\,000$ latidos de la partición DS1 de MIT-BIH, el entrenamiento
+tarda del orden de decenas de segundos; por eso se ejecuta en segundo plano y el modelo
+entrenado se puede \emph{guardar en disco} (formato de texto \texttt{RFV1}: un volcado en
+preorden de cada árbol) para reutilizarlo entre sesiones sin re-entrenar.
+
+\section{Correspondencia con el código}
+
+\begin{tabular}{@{}ll@{}}
+\textbf{Pseudocódigo} & \textbf{Clase / método Java} \\
+\hline
+\textsc{Entropia} & \texttt{ecg.ml.Entropia.entropia} \\
+\textsc{Construir}, \textsc{Repartir}, \textsc{GananciaInformacion} & \texttt{ecg.ml.ArbolDesicion} \\
+\textsc{PredecirArbol} & \texttt{ArbolDesicion.predecir} \\
+\textsc{EntrenarBosque} & \texttt{ecg.ml.BosqueSimple.entrenar} \\
+\textsc{PredecirDistribucion}, \textsc{Predecir} & \texttt{BosqueSimple.predecirDistribucion / predecir} \\
+\textsc{Bootstrap}, \textsc{MuestraSinReemplazo} & \texttt{ecg.ml.Muestreo} \\
+Guardar / cargar modelo & \texttt{BosqueSimple.guardar / cargar} \\
+\end{tabular}
+
+\end{document}

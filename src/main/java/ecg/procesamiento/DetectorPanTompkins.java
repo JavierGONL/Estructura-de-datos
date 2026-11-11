@@ -73,13 +73,17 @@ public class DetectorPanTompkins implements DetectorQRS {
         int ventanaT = (int) Math.round(VENTANA_ONDA_T * fs);
         int radioPendiente = Math.max(1, (int) Math.round(VENTANA_INTEGRACION * fs / 2));
 
+        // Máximo de |d| en la ventana [i-radio, i+radio] para todo i, en O(n) con una ventana
+        // deslizante (antes se recalculaba con maxAbs en cada candidato, O(n·ventana)).
+        double[] pendienteVentana = maxAbsVentana(d, radioPendiente);
+
         List<Integer> picos = new ArrayList<>();
         int ultimo = -1_000_000;
         double pendienteUltimo = 0;
 
         for (int i = 1; i < n - 1; i++) {
             if (!(mw[i] >= mw[i - 1] && mw[i] > mw[i + 1])) continue;
-            double pendiente = maxAbs(d, i - radioPendiente, i + radioPendiente);
+            double pendiente = pendienteVentana[i];
 
             if (mw[i] > umbral) {
                 int distancia = i - ultimo;
@@ -107,10 +111,36 @@ public class DetectorPanTompkins implements DetectorQRS {
 
     private static int ventana(double segundos, double fs) { return Math.max(1, (int) Math.round(segundos * fs)); }
 
-    private static double maxAbs(double[] v, int a, int b) {
-        double m = 0;
-        for (int i = Math.max(0, a); i <= Math.min(v.length - 1, b); i++) m = Math.max(m, Math.abs(v[i]));
-        return m;
+    /**
+     * Máximo de |v| en la ventana centrada [i-radio, i+radio] para cada i, en O(n) usando un deque
+     * monótono decreciente (ventana deslizante). Sustituye al cálculo O(n·ventana) por candidato.
+     */
+    private static double[] maxAbsVentana(double[] v, int radio) {
+        int n = v.length;
+        double[] r = new double[n];
+        int[] deque = new int[n];   // índices, con |v| decreciente desde el frente
+        int cabeza = 0, cola = 0;   // [cabeza, cola)
+        // Precarga la parte izquierda de la ventana del primer i (índices 0..radio-1); el índice
+        // i+radio de cada paso lo añade el bucle.
+        for (int j = 0; j < radio && j < n; j++) {
+            double vj = Math.abs(v[j]);
+            while (cola > cabeza && Math.abs(v[deque[cola - 1]]) <= vj) cola--;
+            deque[cola++] = j;
+        }
+        for (int i = 0; i < n; i++) {
+            // 1) incorpora el índice que entra por la derecha de la ventana centrada en i.
+            int entra = i + radio;
+            if (entra < n) {
+                double ve = Math.abs(v[entra]);
+                while (cola > cabeza && Math.abs(v[deque[cola - 1]]) <= ve) cola--;
+                deque[cola++] = entra;
+            }
+            // 2) descarta por la izquierda lo que ya salió de la ventana [i-radio, i+radio].
+            int limite = i - radio;
+            while (cola > cabeza && deque[cabeza] < limite) cabeza++;
+            r[i] = (cola > cabeza) ? Math.abs(v[deque[cabeza]]) : 0.0;
+        }
+        return r;
     }
 
     private static double[] reemplazarNaN(double[] x) {

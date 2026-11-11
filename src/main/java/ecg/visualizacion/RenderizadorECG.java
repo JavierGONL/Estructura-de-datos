@@ -76,6 +76,14 @@ public class RenderizadorECG {
     // ---------- dibujo ----------
 
     public void dibujar(Graphics2D g2, RegistroECG registro, ConfiguracionVista c, Dimension dim) {
+        dibujar(g2, registro, c, dim, true);
+    }
+
+    /**
+     * @param conCursor si es false no dibuja el cursor de inspección (línea del ratón); se usa para
+     *                  cachear la "escena base" y pintar el cursor aparte en cada movimiento del ratón.
+     */
+    public void dibujar(Graphics2D g2, RegistroECG registro, ConfiguracionVista c, Dimension dim, boolean conCursor) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
@@ -103,7 +111,9 @@ public class RenderizadorECG {
             cursor.dibujarSeleccion(g, r, c);
             senal.dibujar(g, canal, r, c);
             anotaciones.dibujar(g, registro, r, c);
-            cursor.dibujarCursor(g, r, c, canal, canales.get(k) == c.getCursorCanal());
+            if (conCursor) {
+                cursor.dibujarCursor(g, r, c, canal, canales.get(k) == c.getCursorCanal());
+            }
 
             if (c.isMostrarNombres()) {
                 g.setFont(g.getFont().deriveFont(Font.BOLD, 13f));
@@ -115,6 +125,23 @@ public class RenderizadorECG {
             g2.setColor(new Color(120, 120, 120));
             g2.setStroke(new BasicStroke(1f));
             g2.drawRect(r.x, r.y, r.width, r.height);
+        }
+    }
+
+    /** Dibuja únicamente el cursor de inspección (para pintarlo sobre una escena ya cacheada). */
+    public void dibujarSoloCursor(Graphics2D g2, RegistroECG registro, ConfiguracionVista c, Dimension dim) {
+        if (registro == null || !c.isMostrarCursor()) return;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        List<Integer> canales = canalesEfectivos(registro, c);
+        List<Rectangle> celdas = calcularCeldas(registro, c, dim);
+        for (int k = 0; k < canales.size(); k++) {
+            CanalECG canal = registro.getCanal(canales.get(k));
+            Rectangle r = celdas.get(k);
+            Graphics2D g = (Graphics2D) g2.create();
+            g.clipRect(r.x, r.y, r.width + 1, r.height + 1);
+            cursor.dibujarCursor(g, r, c, canal, canales.get(k) == c.getCursorCanal());
+            g.dispose();
         }
     }
 
