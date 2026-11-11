@@ -1,0 +1,138 @@
+\documentclass[conference]{IEEEtran}
+
+% =========================================================
+% PLANTILLA LIGERA PARA OVERLEAF FREE
+% Compilador recomendado: pdfLaTeX
+% =========================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{xcolor}
+\usepackage{listings}
+% Se activan cuando el documento incluya algoritmos.
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+
+\definecolor{CodeBackground}{HTML}{F4F6F7}
+\definecolor{CodeKeyword}{HTML}{005F73}
+\definecolor{CodeComment}{HTML}{6C757D}
+\definecolor{CodeString}{HTML}{BB3E03}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=blue
+}
+
+\lstdefinestyle{paperstyle}{
+    backgroundcolor=\color{CodeBackground},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{CodeKeyword}\bfseries,
+    commentstyle=\color{CodeComment}\itshape,
+    stringstyle=\color{CodeString},
+    numbers=left,
+    numberstyle=\tiny,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\lstset{
+    style=paperstyle,
+    language=Python
+}
+
+% =========================================================
+% DATOS DEL ARTÍCULO — EDITAR AQUÍ
+% =========================================================
+
+\title{
+Lectura y analisis de señales ECG
+}
+
+\author{
+\IEEEauthorblockN{
+Kevin Javier Gonzalez Luna,
+Iván Felipe Maluche Suarez,
+Angélica Pascagaza Vega
+}
+\IEEEauthorblockA{
+\textit{Universidad Nacional de Colombia}\\
+\textit{Sede Bogotá}\\
+Bogotá D.C., Colombia\\
+\{kegonzalezl, imaluche, apascagaza\}@unal.edu.co
+}
+}
+\begin{document}
+
+\maketitle
+
+% =========================================================
+% RESUMEN
+% =========================================================
+
+\begin{abstract}
+Este documento presenta un estudio y posterior implementacion de un lector de señales ECG por medio de las estructuras de datos aprendidas a lo largo del curso, para esto el grupo se basa en diferentes papers y estudios que permitan comprender a fondo la lectura de estas señales y como mostrarlas y leerlas adecuadamente
+\end{abstract}
+
+\begin{IEEEkeywords}
+Medicina, Electro cardiograma, estructuras de datos,
+algoritmos, instrumentos de medicion.
+\end{IEEEkeywords}
+
+% =========================================================
+% CONTENIDO
+% =========================================================
+
+\input{sections/01-introduccion_objetivos}
+\input{sections/03-requerimientos}
+\input{sections/04-diseño_inicial}
+\input{sections/05-estructuras_utilizadas}
+\input{sections/06-primera_implementacion}
+
+
+% =========================================================
+% AGRADECIMIENTOS
+% =========================================================
+%ESTO ENTRA PARA POSTERIORES ENTREGAS
+%\section*{Agradecimientos}
+
+%Los autores agradecen a la Universidad Nacional de Colombia, Sede Amazonia,
+%y a las personas o instituciones que apoyaron el desarrollo de este proyecto.
+
+% =========================================================
+% REFERENCIAS
+% Sin BibTeX ni Biber para reducir tiempo de compilación.
+% =========================================================
+
+\begin{thebibliography}{00}
+
+%\bibitem{cormen}
+%T. H. Cormen, C. E. Leiserson, R. L. Rivest y C. Stein,
+%\textit{Introduction to Algorithms}, 4th ed.
+%Cambridge, MA, USA: MIT Press, 2022.
+
+\bibitem{pt}
+School of Electrical and Computer Engineering  Cornell David A. Duffield College of Engineering. Accedido el 14 de octubre de 2026. [En línea]. Disponible: \url{https://people.ece.cornell.edu/land/courses/ece5030/labs/s2014/Pan_Tompkins.pdf}
+
+\bibitem{MIT-BIH}
+G. Moody and R. Mark, "MIT-BIH Arrhythmia Database," PhysioNet, version 1.0.0, feb. 2005. doi: 10.13026/C2F305
+
+\end{thebibliography}
+
+\end{document}
