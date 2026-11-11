@@ -48,6 +48,7 @@ public class ControladorECG {
     private RegistroECG registro;
     private ConfiguracionVista config;
     private GestoresVista gestores;
+    private ServicioClasificacion.ResultadoClasificacion ultimaClasificacion;
 
     // ---------------- estado ----------------
 
@@ -126,12 +127,12 @@ public class ControladorECG {
     }
 
     /**
-     * Clasifica los latidos del registro abierto. Toma las posiciones de latido de, en orden de
-     * preferencia: anotaciones de referencia (.atr), detecciones del algoritmo o, si no hay ninguna,
-     * ejecuta la detección automática. Opcionalmente publica las clases como anotaciones para que el
-     * visor las dibuje sobre cada latido.
+     * Clasifica los latidos del registro abierto con el Random Forest, sobre TODAS las derivaciones
+     * (voto blando entre canales). Toma las posiciones de latido de, en orden de preferencia:
+     * anotaciones de referencia (.atr), detecciones del algoritmo o, si no hay ninguna, ejecuta la
+     * detección automática. Opcionalmente publica las clases como anotaciones para el visor.
      *
-     * @param dibujarEnVisor si es true, añade las clases como anotaciones (fuente MANUAL) al registro
+     * @param dibujarEnVisor si es true, añade las clases como anotaciones de clasificación al registro
      */
     public ServicioClasificacion.ResultadoClasificacion clasificarRegistroActual(boolean dibujarEnVisor)
             throws IOException {
@@ -144,8 +145,9 @@ public class ControladorECG {
             if (posiciones.length == 0) {
                 throw new IllegalStateException("No hay latidos que clasificar en el registro.");
             }
-            return clasificador.clasificar(registro, posiciones);
+            return clasificador.clasificar(registro, posiciones, true);   // las 12 derivaciones
         });
+        this.ultimaClasificacion = resultado;
         if (dibujarEnVisor) {
             List<AnotacionECG> marcas = new ArrayList<>(resultado.latidos.size());
             for (ServicioClasificacion.LatidoClasificado l : resultado.latidos) {
@@ -159,6 +161,9 @@ public class ControladorECG {
         }
         return resultado;
     }
+
+    /** Última clasificación del RF en esta sesión (para incluirla en el informe); null si no hubo. */
+    public ServicioClasificacion.ResultadoClasificacion getUltimaClasificacion() { return ultimaClasificacion; }
 
     /** Posiciones de latido disponibles (referencia &gt; algoritmo &gt; detección nueva), ordenadas. */
     private int[] posicionesLatidos() {
@@ -255,11 +260,39 @@ public class ControladorECG {
      */
     public ResultadoRendimiento finalizarYGenerarInforme(Path destino, String observaciones) throws IOException {
         ResultadoRendimiento r = registroMetricas.cerrarEjecucion(observaciones);
+        r.setResumenClasificacion(resumenClasificacionTexto());
         medir("Generar informe PDF", () -> {
             new GeneradorInformePDF().generarInforme(r, destino);
             return null;
         });
         return r;
+    }
+
+    /** Texto preformateado del resultado del RF para el informe PDF; vacío si no hubo clasificación. */
+    private String resumenClasificacionTexto() {
+        ServicioClasificacion.ResultadoClasificacion r = ultimaClasificacion;
+        if (r == null) return "";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Canal(es) usado(s): ").append(r.canalUsado).append('\n');
+        sb.append("Latidos clasificados: ").append(r.latidos.size());
+        if (r.sinVentana > 0) sb.append("   (descartados por ventana incompleta: ").append(r.sinVentana).append(')');
+        sb.append('\n');
+
+        int[] conteo = new int[ecg.ml.Datos.CLASES.length];
+        for (ServicioClasificacion.LatidoClasificado l : r.latidos) conteo[l.clase]++;
+        sb.append("Reparto por clase predicha: ");
+        for (int c = 0; c < conteo.length; c++) {
+            sb.append(ecg.ml.Datos.CLASES[c]).append('=').append(conteo[c]).append("  ");
+        }
+        sb.append('\n').append('\n');
+
+        if (r.tieneReferencia()) {
+            sb.append("Acierto frente a las anotaciones de referencia (.atr):\n");
+            sb.append(ecg.ml.Metricas.reporte(r.matrizConfusion));
+        } else {
+            sb.append("El registro no tiene anotaciones de referencia (.atr): no se calculan métricas de acierto.");
+        }
+        return sb.toString();
     }
 
     // ---------------- auxiliares ----------------

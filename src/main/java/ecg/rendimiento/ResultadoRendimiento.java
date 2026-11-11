@@ -46,6 +46,7 @@ public class ResultadoRendimiento {
     private double frecuenciaMuestreo;
     private long numeroMuestras;
     private String observaciones = "";
+    private String resumenClasificacion = "";   // texto opcional del RF (matriz/accuracy); vacío si no hubo
     private final List<MetricasEjecucion> metricas = new ArrayList<>();
 
     private final String versionJava = System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")";
@@ -60,6 +61,7 @@ public class ResultadoRendimiento {
     }
 
     public void setObservaciones(String o) { this.observaciones = o == null ? "" : o; }
+    public void setResumenClasificacion(String s) { this.resumenClasificacion = s == null ? "" : s; }
     public void agregar(MetricasEjecucion m) { metricas.add(m); }
 
     public LocalDateTime getFecha() { return fecha; }
@@ -68,6 +70,8 @@ public class ResultadoRendimiento {
     public double getFrecuenciaMuestreo() { return frecuenciaMuestreo; }
     public long getNumeroMuestras() { return numeroMuestras; }
     public String getObservaciones() { return observaciones; }
+    public String getResumenClasificacion() { return resumenClasificacion; }
+    public boolean tieneClasificacion() { return !resumenClasificacion.isBlank(); }
     public List<MetricasEjecucion> getMetricas() { return metricas; }
     public String getVersionJava() { return versionJava; }
     public String getSistemaOperativo() { return sistemaOperativo; }

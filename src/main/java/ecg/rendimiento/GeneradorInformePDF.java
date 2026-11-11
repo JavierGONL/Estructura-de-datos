@@ -42,6 +42,7 @@ public class GeneradorInformePDF {
     private PDDocument doc;
     private PDPageContentStream cs;
     private PDFont normal, negrita;
+    private PDFont monoespaciada;
     private float y;
     private int numeroPagina;
     private ResultadoRendimiento datos;
@@ -61,6 +62,7 @@ public class GeneradorInformePDF {
             this.doc = d;
             normal = new PDType1Font(Standard14Fonts.FontName.HELVETICA);                // PDFBOX3
             negrita = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);          // PDFBOX3
+            monoespaciada = new PDType1Font(Standard14Fonts.FontName.COURIER);           // PDFBOX3
             nuevaPagina();
             try {
                 agregarPortada();
@@ -68,6 +70,7 @@ public class GeneradorInformePDF {
                 agregarMetricasGenerales();
                 agregarTablaOperaciones();
                 agregarGraficos();
+                agregarClasificacion();
                 agregarObservaciones();
             } finally {
                 cerrarPagina();
@@ -149,8 +152,21 @@ public class GeneradorInformePDF {
         imagen(graficador.graficoTiempo(resumen));
     }
 
+    private void agregarClasificacion() throws IOException {
+        if (datos == null || !datos.tieneClasificacion()) return;   // solo si hubo clasificación RF
+        titulo("5. Clasificación de latidos (Random Forest)");
+        // El resumen viene preformateado (matriz de confusión + métricas); se imprime en monoespaciada
+        // para conservar la alineación de columnas.
+        for (String linea : datos.getResumenClasificacion().split("\n", -1)) {
+            asegurarEspacio(12);
+            y -= 11;
+            texto(linea, monoespaciada, 8.5f, MARGEN, y);
+        }
+        y -= 10;
+    }
+
     private void agregarObservaciones() throws IOException {
-        titulo("5. Observaciones");
+        titulo((datos != null && datos.tieneClasificacion() ? "6." : "5.") + " Observaciones");
         if (!datos.getObservaciones().isBlank()) {
             parrafo(datos.getObservaciones());
             y -= 4;

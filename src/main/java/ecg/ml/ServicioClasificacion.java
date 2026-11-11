@@ -35,12 +35,15 @@ public final class ServicioClasificacion {
         public final int clase;           // 0..3 (N,S,V,F)
         public final double[] probabilidades;  // una por clase, suma ~1
         public final int claseReal;       // 0..3 si hay anotación de referencia; -1 si no
+        public final int canalesVotantes; // nº de derivaciones que aportaron a la decisión
 
-        LatidoClasificado(int indiceMuestra, int clase, double[] probabilidades, int claseReal) {
+        LatidoClasificado(int indiceMuestra, int clase, double[] probabilidades, int claseReal,
+                          int canalesVotantes) {
             this.indiceMuestra = indiceMuestra;
             this.clase = clase;
             this.probabilidades = probabilidades;
             this.claseReal = claseReal;
+            this.canalesVotantes = canalesVotantes;
         }
 
         public String etiqueta() { return Datos.CLASES[clase]; }
@@ -52,7 +55,7 @@ public final class ServicioClasificacion {
         public final List<LatidoClasificado> latidos;
         public final int[][] matrizConfusion;   // null si no hay etiquetas de referencia
         public final int sinVentana;            // latidos descartados por ventana incompleta
-        public final String canalUsado;
+        public final String canalUsado;         // descripción del/los canal(es) usados
 
         ResultadoClasificacion(List<LatidoClasificado> latidos, int[][] matriz, int sinVentana, String canal) {
             this.latidos = latidos;
@@ -159,20 +162,47 @@ public final class ServicioClasificacion {
     }
 
     /**
-     * Clasifica los latidos del registro abierto. Usa las posiciones indicadas (p. ej. detecciones
-     * del algoritmo o anotaciones de referencia). Para cada latido con ventana completa predice su
-     * clase; si hay anotación de referencia en esa posición, también guarda la clase real.
-     *
-     * @param registro    registro cargado
-     * @param posiciones  índices de muestra de los latidos (R), en orden ascendente
+     * Clasifica los latidos del registro abierto sobre el canal preferido (MLII, o el primero).
+     * Equivale a {@link #clasificar(RegistroECG, int[], boolean)} con una sola derivación.
      */
     public ResultadoClasificacion clasificar(RegistroECG registro, int[] posiciones) {
-        exigirModelo();
-        int idx = indiceCanalPreferido(registro);
-        CanalECG canal = registro.getCanal(idx);
-        double[] x = canal.getMuestras();
+        return clasificar(registro, posiciones, false);
+    }
 
-        double[][] filas = Caracteristicas.extraer(x, posiciones);
+    /**
+     * Clasifica los latidos del registro abierto. Para cada latido con ventana completa predice su
+     * clase; si hay anotación de referencia en esa posición, también guarda la clase real.
+     *
+     * @param registro         registro cargado
+     * @param posiciones       índices de muestra de los latidos (R), en orden ascendente
+     * @param todosLosCanales  si es true, clasifica el latido en TODAS las derivaciones y promedia
+     *                         sus distribuciones (voto blando entre canales), igual que la fusión de
+     *                         Pan-Tompkins. Si es false, usa solo el canal preferido (MLII/primero).
+     */
+    public ResultadoClasificacion clasificar(RegistroECG registro, int[] posiciones, boolean todosLosCanales) {
+        exigirModelo();
+        int nCanales = registro.getNumeroCanales();
+        int nClases = Datos.CLASES.length;
+
+        // Canales a usar: todos, o solo el preferido.
+        int[] canales;
+        if (todosLosCanales && nCanales > 1) {
+            canales = new int[nCanales];
+            for (int i = 0; i < nCanales; i++) canales[i] = i;
+        } else {
+            canales = new int[]{indiceCanalPreferido(registro)};
+        }
+
+        // Señal, características y centros (posiciones R recentradas) por canal.
+        double[][] senalPorCanal = new double[canales.length][];
+        double[][][] filasPorCanal = new double[canales.length][][];
+        for (int k = 0; k < canales.length; k++) {
+            double[] x = registro.getCanal(canales[k]).getMuestras();
+            senalPorCanal[k] = x;
+            filasPorCanal[k] = Caracteristicas.extraer(x, posiciones);
+        }
+        // El centro de referencia para posicionar la marca sale del canal preferido (el primero de la lista).
+        double[] senalRef = senalPorCanal[0];
 
         // Mapa posición de referencia -> clase real (si el registro trae .atr).
         java.util.Map<Integer, Integer> real = clasesReales(registro);
@@ -182,13 +212,24 @@ public final class ServicioClasificacion {
         List<Integer> yReal = new ArrayList<>();
         List<Integer> yPred = new ArrayList<>();
         int sinVentana = 0;
-        for (int i = 0; i < filas.length; i++) {
-            if (filas[i] == null) { sinVentana++; continue; }
-            double[] dist = bosque.predecirDistribucion(filas[i]);
-            int clase = argmax(dist);
-            int centro = Caracteristicas.recentrar(x, posiciones[i]);
+        for (int i = 0; i < posiciones.length; i++) {
+            // Promedia las distribuciones de todos los canales con ventana completa para este latido.
+            double[] acum = new double[nClases];
+            int votantes = 0;
+            for (int k = 0; k < canales.length; k++) {
+                double[] fila = filasPorCanal[k][i];
+                if (fila == null) continue;
+                double[] dist = bosque.predecirDistribucion(fila);
+                for (int c = 0; c < nClases; c++) acum[c] += dist[c];
+                votantes++;
+            }
+            if (votantes == 0) { sinVentana++; continue; }   // ninguna derivación tenía ventana completa
+            for (int c = 0; c < nClases; c++) acum[c] /= votantes;
+
+            int clase = argmax(acum);
+            int centro = Caracteristicas.recentrar(senalRef, posiciones[i]);
             int cReal = hayReferencia ? real.getOrDefault(centro, cercano(real, centro)) : -1;
-            latidos.add(new LatidoClasificado(centro, clase, dist, cReal));
+            latidos.add(new LatidoClasificado(centro, clase, acum, cReal, votantes));
             if (cReal >= 0) { yReal.add(cReal); yPred.add(clase); }
         }
 
@@ -199,7 +240,14 @@ public final class ServicioClasificacion {
             for (int i = 0; i < r.length; i++) { r[i] = yReal.get(i); p[i] = yPred.get(i); }
             matriz = Metricas.matrizConfusion(r, p);
         }
-        return new ResultadoClasificacion(latidos, matriz, sinVentana, canal.getNombre());
+
+        String descripcionCanal;
+        if (canales.length == 1) {
+            descripcionCanal = registro.getCanal(canales[0]).getNombre();
+        } else {
+            descripcionCanal = nCanales + " derivaciones (voto entre canales)";
+        }
+        return new ResultadoClasificacion(latidos, matriz, sinVentana, descripcionCanal);
     }
 
     // ---- ayudantes ----
