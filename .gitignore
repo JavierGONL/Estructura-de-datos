@@ -24,7 +24,9 @@ target/
 *.pdf
 
 # Datos y exportaciones locales
-data/
+data/PTBDB
+data/PTBXL
+data/Sintetico
 exports/
 
 # Archivos comprimidos y paquetes
