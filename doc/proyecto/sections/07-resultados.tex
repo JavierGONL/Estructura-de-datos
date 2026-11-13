@@ -1,0 +1,109 @@
+\section{Resultados}
+%=====================================================================
+
+\subsection{Detección de QRS sobre MIT-BIH}
+En los 15 registros evaluados (Sección~5), la fusión por consenso de las
+dos derivaciones alcanzó $Se=P^{+}=F_1\approx 1{,}000$ frente a las
+anotaciones de referencia, con un error temporal medio inferior a una
+muestra a 360\,Hz. El número de latidos emparejados por registro varió
+entre 405 (registro 217, con abundantes latidos de la clase V) y 3\,355
+(registro 215), cubriendo un total de 39\,773 latidos emparejados en el proceso. Los detalles por registro están en el informe de rendimiento
+individual de cada prueba.
+
+\subsection{Clasificación de latidos (15 pruebas preliminares)}
+La Tabla~\ref{tab:campana} resume el desempeño del bosque aleatorio
+sobre los 15 registros de MIT-BIH. El \emph{accuracy} global osciló
+entre 0,789 (registro 214) y 0,997 (registro 212), con una mediana de
+0,945. La clase N se predijo con precisión y \emph{recall} superiores a
+0,95 en la mayoría de los registros; la clase V se detectó con
+\emph{recall} alto (0,85--1,00) cuando había suficientes ejemplos de
+entrenamiento, pero su precisión cayó en registros con morfologías
+atípicas (p.\,ej., 214: precisión 0,197 con 517 predicciones V frente a
+138 reales). Las clases S y F son las más difíciles: S tiene soportes
+pequeños (0--383 latidos) y el bosque tiende a predecir N; F solo
+aparece en el registro 208 (353 latidos), donde el \emph{recall} fue
+0,448. La \emph{balanced accuracy} (media de \emph{recall} por clase)
+osciló entre 0,29 (registro 210) y 0,997 (registro 212); esta métrica
+refleja mejor que el \emph{accuracy} el desbalance severo entre clases
+(N y V concentran $>90\ porciento$ de los latidos en la mayoría de los
+registros).
+
+\begin{table*}[t]
+\centering\footnotesize
+\caption{Procedimiento de 15 pruebas preliminares sobre MIT-BIH (2
+derivaciones, 360\,Hz, bosque de 200 árboles). Se muestran los soportes
+por clase en la referencia, las métricas globales y el $F_1$ por clase.
+Los registros con soporte 0 en una clase no permiten calcular su
+$F_1$ (se indica con «--»).}
+\label{tab:campana}
+\begin{tabular}{@{}lrrrrrrrrrrrr@{}}
+\toprule
+ & \multicolumn{4}{c}{Soporte} & \multicolumn{3}{c}{Global} & \multicolumn{4}{c}{$F_1$ por clase}\\
+\cmidrule(lr){2-5}\cmidrule(lr){6-8}\cmidrule(lr){9-12}
+Reg. & N & S & V & F & Acc. & $F_1$ macro & Bal. acc. & N & S & V & F\\
+\midrule
+200 & 1742 & 30 & 794 & 2 & 0,942 & 0,470 & 0,463 & 0,959 & 0,000 & 0,921 & 0,000\\
+201 & 1635 & 105 & 18 & 0 & 0,945 & 0,529 & 0,680 & 0,971 & 0,174 & 0,971 & --\\
+202 & 2060 & 55 & 11 & 1 & 0,970 & 0,380 & 0,341 & 0,985 & 0,000 & 0,533 & 0,000\\
+203 & 2491 & 2 & 409 & 1 & 0,975 & 0,473 & 0,458 & 0,986 & 0,000 & 0,908 & 0,000\\
+205 & 2570 & 3 & 71 & 11 & 0,992 & 0,486 & 0,475 & 0,996 & 0,000 & 0,948 & 0,000\\
+207 & 1540 & 107 & 181 & 0 & 0,973 & 0,694 & 0,875 & 0,984 & 0,856 & 0,935 & --\\
+208 & 1579 & 2 & 944 & 353 & 0,931 & 0,639 & 0,612 & 0,944 & 0,000 & 0,994 & 0,617\\
+209 & 2620 & 383 & 1 & 0 & 0,895 & 0,311 & 0,393 & 0,943 & 0,302 & 0,000 & --\\
+210 & 2421 & 20 & 179 & 9 & 0,932 & 0,311 & 0,291 & 0,964 & 0,000 & 0,279 & 0,000\\
+212 & 2746 & 0 & 0 & 0 & 0,997 & 0,250 & 0,997 & 0,998 & -- & -- & --\\
+213 & 2640 & 28 & 158 & 361 & 0,877 & 0,403 & 0,497 & 0,959 & 0,000 & 0,653 & 0,000\\
+214 & 2001 & 0 & 138 & 1 & 0,789 & 0,297 & 0,511 & 0,875 & -- & 0,311 & 0,000\\
+215 & 3188 & 3 & 163 & 1 & 0,968 & 0,377 & 0,339 & 0,983 & 0,000 & 0,525 & 0,000\\
+217 & 244 & 0 & 161 & 0 & 0,844 & 0,411 & 0,804 & 0,886 & -- & 0,757 & --\\
+219 & 2082 & 7 & 58 & 1 & 0,991 & 0,473 & 0,453 & 0,995 & 0,000 & 0,895 & 0,000\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering\footnotesize
+\caption{Tiempos medios (ms) y heap máximo (MiB) por operación,
+promediados sobre las 15 pruebas del muestreo (Windows~11, 20
+procesadores, OpenJDK~25.0.4.1).}
+\label{tab:tiempos}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Operación & Media (ms) & Mín. (ms) & Máx. (ms) & Heap máx. (MiB)\\
+\midrule
+Leer cabecera & 0,41 & 0,29 & 0,54 & \emph{ver nota}\\
+Decodificar señales & 35,6 & 25,1 & 59,9 & \emph{ver nota}\\
+Leer anotaciones & 2,06 & 0,81 & 5,15 & \emph{ver nota}\\
+Cargar registro & 45,3 & 29,2 & 77,4 & \emph{ver nota}\\
+Analizar QRS & 51,6 & 34,2 & 140,9 & \emph{ver nota}\\
+Clasificar latidos (RF) & 144,9 & 97,3 & 204,7 & \emph{ver nota}\\
+Abrir visor & 30,4 & 22,3 & 135,9 & \emph{ver nota}\\
+Exportar PNG & 37,2 & 32,9 & 67,3 & \emph{ver nota}\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\emph{Nota:} el heap máximo de la Tabla~\ref{tab:tiempos} se informa en
+el Excel por prueba y no por operación; los valores oscilaron entre
+20,6\,MiB (P001, lectura de cabecera) y 837,7\,MiB (P006, análisis QRS),
+con una tendencia creciente a lo largo de la sesión por acumulación de
+referencias vivas entre pruebas (la JVM no se reinició entre P001 y
+P015). El detalle por prueba está en el archivo
+\texttt{resultados\_pruebas.xlsx} y en los informes PDF individuales.
+
+
+
+\subsection{Ejemplo de informe de rendimiento}
+La evaluación experimental de un registro de 60\,s y 12 derivaciones
+(tres repeticiones tras el calentamiento) produjo un informe PDF de tres
+páginas. Las operaciones de mayor coste fueron la exportación PNG de la
+imagen estándar de $1\,891\times852$ píxeles (125\,ms de media) y su
+renderizado (105\,ms), frente a 39\,ms para cargar el registro (de ellos
+25\,ms de decodificación) y 28\,ms para la detección en las doce
+derivaciones. En ese informe el heap máximo observado fue de 29,3\,MiB
+mientras que la memoria residente fue de 103\,MiB, una diferencia de más
+de tres veces que ilustra por qué ambas magnitudes se informan por
+separado. En la plataforma Linux utilizada fue posible informar CPU de
+usuario y de sistema; en Windows las columnas de CPU aparecen como «no
+disponible» y solo se informa el heap (como en la
+Tabla~\ref{tab:tiempos}).

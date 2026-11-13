@@ -3,9 +3,23 @@
 Como uno de los campos mas importantes de la medicina, el analisis del corazon es una de las areas de mayor necesidad de avance por lo vital de su papel dentro del funcionamiento en el cuerpo humano y lo sensible que este organo puede llegar a ser ante cambios.
 \\
 Por este motivo el campo del analisis de la señales producidas por el corazon (señales ECG) estan en una constante busqueda por metodos cada vez mas rapidos y precisos de manera que cada vez sea mas factible la identificacion de factores de riesgro criticos y por tanto el cuidado de la salud y vida de pacientes. La necesidad anteriormente descrita de este campo de la medicina en los ultimos años se le ha puesto especial interes gracias al crecimiento de la inteligencia artificial dentro de diferentes campos y su prometedor uso en la medicina para justamente ser capaces de identificar posibles comportamientos anomalos rapidamentes a partir de patrones analizados previamente. \cite{MtECG} 
+\subsection{El formato WFDB}
+Un registro WFDB consta de una cabecera de texto (\texttt{.hea}) y uno o varios archivos binarios de señal (\texttt{.dat}). Para cada señal, la cabecera declara el archivo, el formato de codificación, la ganancia (unidades ADC por unidad física), la línea de base, las unidades, la resolución, el valor inicial, el \emph{checksum} y una descripción~\cite{wfdb}. Distintos canales pueden residir en archivos distintos y con formatos distintos, por lo que ninguna propiedad debe suponerse común. La conversión a unidad física de la muestra digital $D_i$ de la señal $i$ es
+\begin{equation}
+V_i=\frac{D_i-B_i}{G_i},
+\label{eq:conv}
+\end{equation}
+con $B_i$ la línea base y $G_i$ la ganancia. Las anotaciones de referencia se almacenan en archivos aparte (\texttt{.atr}) con un formato de palabras de 16 bits.
+
+\subsection{Detección de QRS}
+El algoritmo de Pan y Tompkins~\cite{pantompkins1985} es el método clásico de detección en tiempo real: filtrado paso banda, derivación, elevación al cuadrado, integración en ventana móvil y umbrales adaptativos sobre las estimaciones de nivel de señal y de ruido. Se adoptó aquí una variante expresada en segundos (y no en muestras) para que sea independiente de la frecuencia de muestreo.
+
+\subsection{Medición de recursos en la JVM}
+Java ofrece \texttt{ThreadMXBean}, con el tiempo de CPU del hilo actual, y, en las implementaciones que lo soportan, la extensión \texttt{com.sun.management.OperatingSystemMXBean}, con la CPU total del proceso~\cite{oraclejmx}. No existe una API portable para separar el tiempo de CPU de usuario y de sistema del proceso; en Linux se puede leer \texttt{/proc/self/stat}. Del mismo modo, \texttt{Runtime.totalMemory()-freeMemory()} mide el heap utilizado y no la memoria física del proceso. Estas diferencias condicionan el diseño del módulo de rendimiento (Sección~\ref{sec:rend}).
+
 \subsection{Random Forest}
 Dentro de las implementaciones de las estructuras de datos y dentro del marco de la inteligencia artificial existe un sistema conformado por un tipo de arboles para realizar un modelo de aprendizaje capaz de realizar predicciones, a este modelo se le conoce como random forest.
 \\
 Como su nombre indica el modelo se conforma por un conjunto de arboles siendo de este caso arboles de decision, cada uno de estos arboles a base de un algoritmo que identifica los valores por umbrales de decision guarda una proporcion de las muestras en sus hojas. Cada uno de estos arboles aportara al sistema una prediccion que puede ser o no sesgada pero que en cualquier caso gracias a los demas arboles permitira una prediccion aproximada y confiable. \cite{RF}
 \\
-\bf Pd: Para comprender mas a fondo el funcionamiento de estos arboles se puede consultar el documento "RandomForest.pdf" ubicado en la carpeta anexos
+\textbf{Pd: Para comprender mas a fondo el funcionamiento de estos arboles se puede consultar el documento RandomForest.pdf ubicado en la carpeta anexos}

@@ -1,0 +1,72 @@
+\section{Metodología experimental}
+%=====================================================================
+
+\textbf{Datos.} Se emplearon los repositorios públicos de PhysioNet
+\cite{goldberger2000}: la \emph{MIT-BIH Arrhythmia Database}
+\cite{moody2001} para la clasificación de latidos (4 clases AAMI: N, S,
+V, F), y las bases PTB Diagnostic ECG (PTBDB) y PTB-XL \cite{wagner2020}
+para validar la lectura de registros de 12 derivaciones con metadatos
+heterogéneos. La partición de evaluación sigue la propuesta de de Chazal
+et al.~\cite{dechazal2004} (DS1/DS2 por registro). Los registros de
+MIT-BIH se leyeron directamente de los archivos \texttt{.hea}/\texttt{.dat}/\texttt{.atr}
+con el lector WFDB descrito en la Sección~2; los de PTBDB y PTB-XL se
+usaron para comprobar la conversión de unidades, la ganancia por canal y
+el número variable de derivaciones. Adicionalmente, el generador
+sintético incluido en el proyecto permitió verificar la cadena completa
+(cabecera, formato 16/212, \emph{checksum} y anotaciones con SKIP) en
+casos controlados.
+
+\textbf{Experimento A (detección).} Se evaluó el detector Pan-Tompkins
+por derivación y la fusión por consenso sobre registros reales de
+MIT-BIH (360\,Hz, 2 derivaciones, formato 212) con tolerancia
+$\tau=0{,}15$\,s, comparando contra las anotaciones de referencia del
+\texttt{.atr}. La validación se realizó registro a registro.
+
+%\textbf{Experimento B (escalabilidad).} Registros de 12 derivaciones a
+%500\,Hz con duración de 30, 60, 120, 300 y 600\,s, en formatos 16 y 212.
+%Para cada uno se midieron la carga completa (cabecera, validación,
+%decodificación, conversión y anotaciones), la detección en las 12
+%derivaciones con fusión y la generación de la impresión estándar de
+%5\,s. Se realizaron dos repeticiones de calentamiento y cinco medidas,
+%con recolección de basura previa a cada una; se informa la media.
+
+\textbf{Campaña de 15 pruebas preliminares (esta entrega).} Con el
+clasificador ya entrenado con DS1, se ejecutó el flujo completo
+(carga $\rightarrow$ detección QRS $\rightarrow$ fusión $\rightarrow$
+extracción de 257 características $\rightarrow$ clasificación con el
+bosque $\rightarrow$ validación contra referencia) sobre 15 registros
+de MIT-BIH: 200, 201, 202, 203, 205, 207, 208, 209, 210, 212, 213, 214,
+215, 217 y 219. Cada prueba corresponde a un registro (P001--P015 en la
+Tabla~\ref{tab:campana}) y se ejecutó en una sesión independiente de la
+JVM. Para cada prueba se registraron: el número de latidos por clase en
+la referencia (Soporte N/S/V/F), la matriz de confusión $4\times4$, las
+métricas por clase (precisión, \emph{recall}, especificidad, $F_1$) y
+las métricas globales (\emph{accuracy}, $F_1$ macro, \emph{balanced
+accuracy}), además de los tiempos y el consumo de recursos de cada
+operación del flujo (carga, decodificación, análisis QRS, clasificación
+RF, apertura del visor y exportación PNG). La Tabla~\ref{tab:campana}
+resume los resultados de clasificación; la Tabla~\ref{tab:tiempos}
+resume los tiempos y el heap máximo por operación, promediados sobre las
+15 pruebas. Los informes PDF individuales
+(\texttt{informe\_rendimiento\_*.pdf}) se generaron con el módulo de
+rendimiento descrito en la Sección~\ref{sec:rend}.
+
+%\textbf{Entorno.} Las pruebas de clasificación y de rendimiento de esta
+%entrega se ejecutaron en Windows~11 (amd64) con 20 procesadores,
+%OpenJDK~25.0.4.1 (Eclipse Adoptium) y \texttt{-Xmx2g}. El experimento B
+%de escalabilidad se ejecutó en Linux~6.18 (amd64), OpenJDK~21.0.12, un
+%único procesador y 4\,GB de RAM, en modo sin pantalla; por tanto, sus
+%tiempos no son directamente comparables con los de la
+%Tabla~\ref{tab:tiempos}. La verificación de la generación de PDF se
+%realizó con PDFBox~2.0.29; el código está escrito para la serie 3.x
+%declarada en el \texttt{pom.xml} (solo difiere la creación de las
+%fuentes).
+
+\textbf{Pruebas automáticas.} 31 pruebas JUnit~5 cubren la lectura
+(cabeceras, formatos 16/212/8/24/32 con vectores construidos a mano,
+conversión de unidades, anotaciones con SKIP, \emph{checksum}, ausencia
+de ganancia), el procesamiento (detección, fusión, validación, RR/FC),
+la visualización (distribuciones, zoom con punto fijo, selección y
+cursor), la exportación (calibración exacta, coincidencia píxel a píxel
+con la pantalla, paginación) y el rendimiento (medidores, anidamiento,
+PDF y evaluación experimental).

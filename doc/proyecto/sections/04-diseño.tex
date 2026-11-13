@@ -1,18 +1,83 @@
-\section{Diseño inicial de la solucion}
+\section{Diseño y arquitectura de la solucion}
 \label{sec:diseño}
 
 \subsection{Orden del proyecto del proyecto}
-Dentro de la carpeta src disponible junto con este documento se encuentra:
+Dentro de la carpeta src disponible junto con este documento se encuentra la carpeta main, que contiene la carpeta java que a su vez contiene la carpeta ecg, dentro de esta se encuentra los aspectos relevantes de nuestro algoritmo:
 \begin{itemize}
-    \item \textbf{graficador:} Contiene los archivos necesarios para graficar la señal ECG y obtener sus datos, no se ahondara directamente en su implementacion al no ser el objeto principal para las implemenaciones de estructuras de datos.
-    \item \textbf{LinkedList:} Contiene la implementacion de la estructura de datos Linked List generica.
-    \item \textbf{implementaciones:} Contendra las implementaciones de estructuras de datos y ADT genericas que se usaran para el proyecto, actualmente se encuentran una implementacion de Cqueues y CLinked List.
-    \item \textbf{DeteccionQRS.java:} Contiene el codigo que hace uso de las implementaciones y el graficador para filtrar y mantener un registro de los datos del ECG.
+    \item \textbf{exportacion:} Contiene los archivos necesarios para convertir los resultados graficos obtenidos a formato PNG, incluye soporte para canales seleccionados y de la vista exacta actual.
+    \item \textbf{interfaz:} Contiene todos los archivos que definen la forma del programa y su interaccion con el usuario
+    \item \textbf{lectura:} Dentro de esta carpeta se encuentra el conjunto de programas que hacen posible la lectura de los archivos del ECG.
+    \item \textbf{ml:} Dentro de la carpeta se encuentran los archivos pertenencientes al Random forest junto con algunos ejemplos y las estructuras implementadas para el proyecto (Dynarray,Cqueue, heaps, etc) un readme con una explicacion, esto se hace con el fin de comprender esta estructura que a diferencia de las demas usadas es de especial complejidad.
+    \item \textbf{modelo:} Contiene el codigo encargado de entre otras tareas dar los resultados, identificar las anotaciones, etc.
+    \item \textbf{procesamiento:} Como su nombre indica dentro de esta carpeta se encuentran los diferentes archivos que permiten al codigo procesar la informacion obtenida de los registros y las prediccions.
+    \item \textbf{rendimiento:} Los archivos dentro permiten el funcionamiento adecuado de la pestaña de rendimiento dentro del programa.
+    \item \textbf{utilidades:} Contiene funciones usadas para facilitar el desarrollo del algoritmo en otras secciones del codigo.
+    \item \textbf{Main.java:} Archivo principal del programa, es en donde sucede todo el loop principal de operacion.
 \end{itemize}
 
 \subsection{Loop basico de la implementacion}
-Por medio del lo archivos dispuestos en la carpeta "graficador" se crea un objeto capaz de graficar correctamente el ECG y entregar sus datos, teniendo esto y las respectivas implementaciones de Linked list y circular queue basandose en el algoritmo de pan-topkins el archivo analisisECG.java se encarga de filtrar los datos por medio de la cqueue
-y mantener un registro de estos en la linked list. Hecho esto se realizan los calculos y se entregan las propiedades en termianl mientras que la grafica se mantiene en una ventana emergente. \cite{pt}
-
+Inicialmente el programa realiza una comprobacion inicial con la carpeta test presente al mismo nivel de la carpeta main, hecho esto usa las diferentes subcarpetas explicadas anteriormente para componer el programa y ser capaz de manejar archivos de ECG.
 \subsection{Futuros aspectos a implementar}
-Tomando en cuenta lo alcanzado en esta primera etapa esperamos poder a futuro implementar mas estructuras para la toma de decisiones y analisis de propiedades de la señal, asi como mejorar el formato de salida principalmente para las propiedades
+Tomando en cuenta lo alcanzado en esta segunda etapa de la implementacion y como se avanzo hasta llegar a un resultado bastante considerable el grupo esta a la espera de los temas del tercer corte de forma que se pueda valorar mas estructuras para implementacion o determinar el resultado actual como suficientemente adecuado.
+\subsection{Arquitectura}
+%=====================================================================
+La aplicación se organiza en tres subsistemas (lectura y procesamiento, visualización y exportación, evaluación de rendimiento) soportados por ocho paquetes (Fig.~\ref{fig:arq}). La Tabla~\ref{tab:codigo} resume su tamaño.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  caja/.style={draw,rounded corners=2pt,minimum height=0.8cm,minimum width=2.5cm,font=\small,align=center,fill=blue!6},
+  cajaA/.style={draw,rounded corners=2pt,minimum height=0.8cm,minimum width=2.5cm,font=\small,align=center,fill=green!8},
+  cajaB/.style={draw,rounded corners=2pt,minimum height=0.8cm,minimum width=2.5cm,font=\small,align=center,fill=orange!10},
+  flecha/.style={-{Stealth[length=2mm]},thick}]
+  \node[cajaA] (arch) {Archivos\\\texttt{.hea}/\texttt{.dat}/\texttt{.atr}};
+  \node[caja,right=0.9cm of arch] (lect) {\texttt{lectura}};
+  \node[caja,right=0.9cm of lect] (mod) {\texttt{modelo}\\{\scriptsize RegistroECG, ConfiguracionVista}};
+  \node[caja,right=0.9cm of mod] (proc) {\texttt{procesamiento}};
+  \node[caja,below=1.0cm of mod] (vis) {\texttt{visualizacion}\\{\scriptsize RenderizadorECG}};
+  \node[caja,left=0.9cm of vis] (exp) {\texttt{exportacion}\\{\scriptsize PNG}};
+  \node[caja,right=0.9cm of vis] (int) {\texttt{interfaz}\\{\scriptsize Swing, controlador}};
+  \node[cajaB,below=1.0cm of vis] (rend) {\texttt{rendimiento}\\{\scriptsize medidores, PDF}};
+  \node[cajaA,right=0.9cm of int] (usr) {Usuario};
+  \draw[flecha] (arch)--(lect);
+  \draw[flecha] (lect)--(mod);
+  \draw[flecha] (mod)--(proc);
+  \draw[flecha] (mod)--(vis);
+  \draw[flecha] (vis)--(exp);
+  \draw[flecha] (int)--(vis);
+  \draw[flecha] (usr)--(int);
+  \draw[flecha,dashed] (rend)--(vis);
+  \draw[flecha,dashed] (rend.east) -| (int.south);
+  \draw[flecha,dashed] (rend.west) -| ([xshift=-0.6cm]exp.south);
+  \node[font=\scriptsize,below=0.15cm of rend] {discontinua: mide las operaciones de la capa};
+\end{tikzpicture}
+\caption{Arquitectura modular. Las flechas continuas indican flujo de datos; las discontinuas, medición de rendimiento. La capa \texttt{utilidades} (rutas, formatos, generador sintético) es transversal.}
+\label{fig:arq}
+\end{figure*}
+
+\begin{table}[t]
+\centering\small
+\caption{Tamaño del código (líneas Java).}
+\label{tab:codigo}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Paquete & Archivos & Líneas \\
+\midrule
+\texttt{modelo}        & 9  & 441 \\
+\texttt{lectura}       & 13 & 762 \\
+\texttt{procesamiento} & 9  & 488 \\
+\texttt{visualizacion} & 15 & 921 \\
+\texttt{exportacion}   & 8  & 313 \\
+\texttt{rendimiento}   & 9  & 975 \\
+\texttt{interfaz}      & 12 & 1\,193 \\
+\texttt{utilidades}    & 6  & 257 \\
+\texttt{ml}   & 8  & 1\,040 \\
+\texttt{Estructuras}   & 5  & 651 \\
+\texttt{Main}          & 1  & 95 \\
+\midrule
+Total (código)         & 82 & 7\,136 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Se establecieron cuatro principios de diseño: (i) el número de canales lo dicta la cabecera (listas dinámicas, sin matrices de tamaño fijo); (ii) cada canal conserva sus metadatos, incluidos archivo, ganancia y línea base; (iii) la configuración de vista es el único estado compartido entre el visor y los exportadores; y (iv) las interacciones (zoom, desplazamiento) modifican únicamente esa configuración, nunca las muestras.

@@ -4,66 +4,58 @@
 % PLANTILLA LIGERA PARA OVERLEAF FREE
 % Compilador recomendado: pdfLaTeX
 % =========================================================
-
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.7}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage[spanish,es-noshorthands]{babel}
 \usepackage{lmodern}
 \usepackage{microtype}
-
+\usepackage[margin=1.8cm,columnsep=0.7cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{multirow}
-\usepackage{array}
-\usepackage{url}
-\usepackage{cite}
-\usepackage{xcolor}
-\usepackage{listings}
-% Se activan cuando el documento incluya algoritmos.
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{verbatim}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{listings}
 \usepackage{hyperref}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
 
 \definecolor{CodeBackground}{HTML}{F4F6F7}
 \definecolor{CodeKeyword}{HTML}{005F73}
 \definecolor{CodeComment}{HTML}{6C757D}
 \definecolor{CodeString}{HTML}{BB3E03}
+% --- ELIMINADO: algorithm2e (incompatible con algorithm+algpseudocode) ---
+% \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\captionsetup{font=small,labelfont=bf}
+% --- El paquete 'algorithm' ya define el nombre en español vía babel; ---
+% --- \SetAlgorithmName es opcional. Si lo quieres, deja solo esta línea: ---
+\floatname{algorithm}{Algoritmo}
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Salida:}}
+\setlength{\parskip}{0.2em}
+\sloppy
 
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black,
-    citecolor=black,
-    urlcolor=blue
-}
 
-\lstdefinestyle{paperstyle}{
-    backgroundcolor=\color{CodeBackground},
-    basicstyle=\ttfamily\footnotesize,
-    keywordstyle=\color{CodeKeyword}\bfseries,
-    commentstyle=\color{CodeComment}\itshape,
-    stringstyle=\color{CodeString},
-    numbers=left,
-    numberstyle=\tiny,
-    numbersep=5pt,
-    frame=single,
-    breaklines=true,
-    showstringspaces=false,
-    tabsize=4
-}
 
-\lstset{
-    style=paperstyle,
-    language=Python
-}
 
 % =========================================================
 % DATOS DEL ARTÍCULO — EDITAR AQUÍ
 % =========================================================
-
-\title{
-Lectura, analisis y prediccion de señales ECG
-}
+\title{\textbf{Diseño e implementación de un visor interactivo de ECG de multiples derivaciones con exportación de imágenes y evaluación del consumo de recursos}}
 
 \author{
 \IEEEauthorblockN{
@@ -91,8 +83,8 @@ Este documento presenta el diseño y posterior implementacion de un lector de se
 \end{abstract}
 
 \begin{IEEEkeywords}
-Medicina, Electro cardiograma, estructuras de datos,
-algoritmos, instrumentos de medicion, ineligencia artificial, Random Forest, prediccion.
+Medicina, Electro cardiograma, estructuras de datos, WFDB, PhysioNet, visualización interactiva, detección de QRS, Java, evaluación de rendimiento
+algoritmos, instrumentos de medicion, Random Forest, prediccion.
 \end{IEEEkeywords}
 
 % =========================================================
@@ -103,9 +95,9 @@ algoritmos, instrumentos de medicion, ineligencia artificial, Random Forest, pre
 \input{sections/02-Mt_RandomForest}
 \input{sections/03-requerimientos}
 \input{sections/04-diseño}
-\input{sections/05-estructuras_utilizadas}
-\input{sections/06-primera_implementacion}
-%\input{sections/angelica}
+\input{sections/05-implementacion}
+\input{sections/06-metodologia}
+\input{sections/07-resultados}
 % =========================================================
 % AGRADECIMIENTOS
 % =========================================================
@@ -135,17 +127,25 @@ A. J. Prakash, A. N. Belkacem, I. M. Elfadel, H. F. Jelinek y M. Atef. “Fronti
 G. Moody and R. Mark, "MIT-BIH Arrhythmia Database," PhysioNet, version 1.0.0, feb. 2005. doi: 10.13026/C2F305
 \bibitem{RF}
 H. A. Salman, A. Kalakech, and A. Steiti, "Random Forest Algorithm Overview," Babylonian Journal of Machine Learning, vol. 2024, pp. 69-79, Jun. 2024, doi: 10.58496/BJML/2024/007.
-\bibitem{WFDB}
-PhysioNet. WFDB Software Package: header and signal
-file specifications. https://physionet.org/content/wfdb/
-\bibitem{PDF_CREATOR}
-Apache Software Foundation. Apache PDFBox. https://pdfbox.apache.org/
 \bibitem{interpretacionECG}
 Kligfield P, Gettes LS, Bailey JJ, et al. Recommendations
 for the standardization and interpretation of
 the electrocardiogram. Circulation 2007;115(10):1306-1313.
 \bibitem{PhysioNet}
 Pollard, T., Moody, B. E., Lehman, L., Gow, B., Fernandes, C., Xie, C., Johnson, A., Mark, R. G., Heldt, T. (2026). PhysioNet as a global platform for biomedical research. Nature Health. https://doi.org/10.1038/s44360-026-00096-z. Available from: https://pmc.ncbi.nlm.nih.gov/articles/PMC13641116/
+\bibitem{goldberger2000} Goldberger AL, Amaral LAN, Glass L, et al. PhysioBank, PhysioToolkit, and PhysioNet: components of a new research resource for complex physiologic signals. \emph{Circulation} 2000;101(23):e215--e220.
+\bibitem{moody2001} Moody GB, Mark RG. The impact of the MIT-BIH Arrhythmia Database. \emph{IEEE Eng Med Biol Mag} 2001;20(3):45--50.
+\bibitem{wagner2020} Wagner P, Strodthoff N, Bousseljot RD, et al. PTB-XL, a large publicly available electrocardiography dataset. \emph{Sci Data} 2020;7:154.
+\bibitem{pantompkins1985} Pan J, Tompkins WJ. A real-time QRS detection algorithm. \emph{IEEE Trans Biomed Eng} 1985;32(3):230--236.
+\bibitem{kligfield2007} Kligfield P, Gettes LS, Bailey JJ, et al. Recommendations for the standardization and interpretation of the electrocardiogram. \emph{Circulation} 2007;115(10):1306--1313.
+\bibitem{wfdb} PhysioNet. WFDB Software Package: header and signal file specifications. \url{https://physionet.org/content/wfdb/}
+\bibitem{pdfbox} Apache Software Foundation. Apache PDFBox. \url{https://pdfbox.apache.org/}
+\bibitem{oraclejmx} Oracle. Java SE API: \texttt{java.lang.management} (\texttt{ThreadMXBean}, \texttt{OperatingSystemMXBean}).
+% Breiman, L. (2001). Random Forests. Machine Learning, 45(1), 5-32.
+% Quinlan, J. R. (1986). Induction of Decision Trees. Machine Learning, 1(1), 81-106.
+ \bibitem{dechazal2004}
+de Chazal, P., O'Dwyer, M., Reilly, R. B. (2004). Automatic Classification of Heartbeats Using ECG Morphology and Heartbeat Interval Features.
+%   IEEE Trans. Biomedical Engineering, 51(7), 1196-1206.
 \end{thebibliography}
 
 \end{document}
